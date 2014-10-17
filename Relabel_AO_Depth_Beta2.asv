@@ -181,18 +181,18 @@ if doneTag == 0
     
 else
     
-    if ~exist(newLoc,'dir')
-        mkdir(newLoc)
-    end
+    test = DirDupCheck(oldLoc, newLoc);
     
-    simCheck = isequal(GetDirFileList(newLoc),GetDirFileList(oldLoc));
-    
-    if ~simCheck
+    if test
         
         for allLi = 1:length(depthFiles)
             
             alltempFname = depthFiles{allLi};
             allnewFname = [newLoc,'\',depthFiles{allLi}];
+            
+            if ~exist(newLoc,'dir')
+                mkdir(newLoc)
+            end
             
             copyfile(alltempFname,allnewFname);
             
@@ -330,4 +330,19 @@ toSaveFiles = toSaveFiles(emptyInd,:);
 end
 
 
+%%%
 
+function [test] = DirDupCheck(dir1, dir2)
+
+test = isequal()
+
+
+
+
+
+
+
+
+
+
+end
