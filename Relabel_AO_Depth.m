@@ -12,7 +12,7 @@ if exist('Y:\','dir')
     cd(AOLoc)
     dirfolders = dir;
     foldernamesTemp = {dirfolders.name};
-    foldernamesFinal = foldernamesTemp(3:end);
+    foldernamesFinal = foldernamesTemp(~cellfun(@(x) strcmp('.',x(1)),foldernamesTemp));
 else
     warndlg('Check for Y:\DBS Drive');
 end
@@ -65,8 +65,7 @@ end
 
 end % End of main function
 
-
-
+% RENAME_FILE FUNCTION
 
 function rename_file(depthFiles)
 
@@ -131,7 +130,6 @@ for abi = 1:height(abvOutT)
     abtempFname = [abvOutT.abDSDepthAct{abi},'.mat'];
     abnewFname = [abvOutT.abDSName{abi},'_',num2str(abi),'_',abvOutT.abDSDepthAct{abi},'.mat'];
     movefile(abtempFname,abnewFname);
-    
 end
 
 %% Below Target
@@ -144,7 +142,6 @@ for bli = 1:height(blwOutT)
     bltempFname = [blwOutT.blDSDepthAct{bli},'.mat'];
     blnewFname = [blwOutT.blDSName{bli},'_',num2str(bli),'_',blwOutT.blDSDepthAct{bli},'.mat'];
     movefile(bltempFname,blnewFname);
-    
 end
 
 end
