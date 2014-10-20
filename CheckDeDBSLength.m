@@ -1,4 +1,4 @@
-function CheckDeDBSLength()
+function CheckDeDBSLength(checkTest)
 
 if exist('Y:\','dir')
     AOLoc = 'Y:\PreProcessEphysData\';
@@ -25,18 +25,25 @@ for fdir = 1:length(foldernamesFinal)
     dirDateFiles = dir('*.mat');
     
     if strcmp(testfile,'Set1') && isempty(dirDateFiles);
-        
-        
+
         for dai = 1:length(diractual)
             
-            checkNames(dateLoc, dai, diractual);
-            
+            switch checkTest
+                case 'Number'
+                    checkNumberOrder(dateLoc, dai, diractual);
+                case 'Name'
+                    checkNames(dateLoc, dai, diractual);
+            end
         end % End of Date loop for Sets
         
     else % it does not have sets
         dai = nan;
-        checkNames(dateLoc, dai, diractual);
-        
+        switch checkTest
+            case 'Number'
+                checkNumberOrder(dateLoc, dai, diractual);
+            case 'Name'
+                checkNames(dateLoc, dai, diractual);
+        end
     end
     
 end
@@ -83,6 +90,45 @@ for fii = 1:length(depthFiles)
 end
 
 end
+
+%% CHECK Number ORDER
+
+function [] = checkNumberOrder(dateLoc, dai, diractual)
+
+if isnan(dai)
+    tempdateLoc = dateLoc;
+else
+    tempdateLoc = strcat(dateLoc,'\',diractual{dai});
+end
+
+cd(tempdateLoc)
+
+depthFiles = GetDirFileList(tempdateLoc);
+
+splitAll = cellfun(@(x) strsplit(x,{'_','.'}), depthFiles,'UniformOutput',false);
+
+targetName = cellfun(@(x) x(1),splitAll);
+fileNumbers = cellfun(@(x) x(2),splitAll);
+fileDepths = cellfun(@(x) x(3),splitAll);
+
+% Above target test
+indexAbove = strcmp(targetName,'AbvTrgt');
+
+numNameMat = [str2double(fileNumbers(indexAbove)),str2double(fileDepths(indexAbove))];
+
+sortNumName = sortrows(numNameMat,1);
+
+testSortDepth = sort(numNameMat(:,2),'descend');
+
+numCheck = isequal(sortNumName(:,2),testSortDepth);
+
+if numCheck
+    return
+end
+
+
+end
+
 
 
 

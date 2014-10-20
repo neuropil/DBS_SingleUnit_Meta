@@ -1,4 +1,4 @@
-function CheckDeDBSLength()
+function CheckDeDBSLength(checkTest)
 
 if exist('Y:\','dir')
     AOLoc = 'Y:\PreProcessEphysData\';
@@ -25,18 +25,25 @@ for fdir = 1:length(foldernamesFinal)
     dirDateFiles = dir('*.mat');
     
     if strcmp(testfile,'Set1') && isempty(dirDateFiles);
-        
-        
+
         for dai = 1:length(diractual)
             
-            checkNames(dateLoc, dai, diractual);
-            
+            switch checkTest
+                case 'Number'
+                    checkNumberOrder(dateLoc, dai, diractual);
+                case 'Name'
+                    checkNames(dateLoc, dai, diractual);
+            end
         end % End of Date loop for Sets
         
     else % it does not have sets
         dai = nan;
-        checkNames(dateLoc, dai, diractual);
-        
+        switch checkTest
+            case 'Number'
+                checkNumberOrder(dateLoc, dai, diractual);
+            case 'Name'
+                checkNames(dateLoc, dai, diractual);
+        end
     end
     
 end
@@ -66,8 +73,11 @@ for fii = 1:length(depthFiles)
     if length(numPart) > 6
        
        trunNum = numPart(1:5);
-       if
-       newVal = str2double(trunNum) + 10;
+       if strcmp(nameParts{1},'BlwTrgt')
+           newVal = str2double(trunNum) + 10;
+       elseif strcmp(nameParts{1},'AbvTrgt')
+           newVal = str2double(trunNum) - 10;
+       end
        zeroEnd = 5 - length(num2str(newVal));
        newNumName = strcat(repmat('0',1,zeroEnd), num2str(newVal));
        newFileName = strcat(nameParts{1},'_',nameParts{2},'_',newNumName,'.mat'); 
@@ -80,6 +90,64 @@ for fii = 1:length(depthFiles)
 end
 
 end
+
+%% CHECK Number ORDER
+
+function [] = checkNumberOrder(dateLoc, dai, diractual)
+
+if isnan(dai)
+    tempdateLoc = dateLoc;
+else
+    tempdateLoc = strcat(dateLoc,'\',diractual{dai});
+end
+
+cd(tempdateLoc)
+
+depthFiles = GetDirFileList(tempdateLoc);
+
+splitAll = cellfun(@(x) strsplit(x,{'_','.'}), depthFiles,'UniformOutput',false);
+
+targetName = cellfun(@(x) x(1),splitAll);
+fileNumbers = cellfun(@(x) x(2),splitAll);
+fileDepths = cellfun(@(x) x(3),splitAll);
+
+% Above target test
+indexAbove = strcmp(targetName,'AbvTrgt');
+
+numNameMat = [str2double(fileNumbers(indexAbove)),str2double(fileDepths(indexAbove))];
+
+sortNumName = sortrows(numNameMat,1);
+
+testSortDepth = sort(numNameMat(:,2),'descend');
+
+numCheck = isequal(sortNumName(:
+
+isequal(str2double(fileNumbers(indexAbove)),str2double(sort(fileNumbers(indexAbove))))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+end
+
 
 
 
