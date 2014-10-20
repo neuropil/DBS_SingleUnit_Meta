@@ -26,12 +26,20 @@ else
     grandCV = mean([abs(std(CLFP1))/abs(mean(CLFP1)) ,...
         abs(std(CLFP2))/abs(mean(CLFP2)) ,...
         abs(std(CLFP3))/abs(mean(CLFP3))]);
+    
+    if sum([abs(std(CLFP1))/abs(mean(CLFP1)) <= 0.3,...
+                          abs(std(CLFP2))/abs(mean(CLFP2)) <= 0.3,...
+                          abs(std(CLFP3))/abs(mean(CLFP3)) <= 0.3]) >= 2
+        mostUnderCV = 1;
+    else
+        mostUnderCV = 0;
+    end
+    
+    
 end
            
-           
-if grandCV <= 0.3 || sum([abs(std(CLFP1))/abs(mean(CLFP1)) <= 0.3,...
-                          abs(std(CLFP2))/abs(mean(CLFP2)) <= 0.3,...
-                          abs(std(CLFP3))/abs(mean(CLFP3)) <= 0.3]) >= 2;
+       
+if grandCV <= 0.3 || mostUnderCV;
     lfpID = 'NO';
     lfpBool = 0;
 else
