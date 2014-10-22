@@ -17,6 +17,7 @@ switch chooseFuns
         edit plotISI_scratchPAD.m
         edit plot_transparent_waveOverlay.m
     case '3'
+        edit MER_SpikeSort_SCRIPT_TEST.m
         edit spikeDebug_case.m
         edit testRunSpikeCode_10_02_2014.m
         edit spikeDebugNOwv.m
