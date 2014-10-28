@@ -18,7 +18,7 @@ end
 load(fileInfo{1})
 
 tempSpk = eval(fileInfo{2});
-sampR = CElectrode1_KHz*1000;
+sampR = sampFreqMER*1000;
 timeAx = linspace(0,length(tempSpk)/(sampR),length(tempSpk));
 
 %% (a) Prepare data

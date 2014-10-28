@@ -21,9 +21,9 @@ else
 end
 
 % Defines nclusters
-cluster_sizes = zeros(length(handles.params.max_clus),1);
-for i = 1:handles.params.max_clus
-    cluster_sizes(i) = length(find(clusterIndex == i));
+cluster_sizes = [];
+for i=1:handles.params.max_clus
+    cluster_sizes = [cluster_sizes length(find(clusterIndex == i))]
 end
 
 nclusters = length(find(cluster_sizes(:) >= handles.params.min_clus));

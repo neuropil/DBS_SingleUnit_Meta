@@ -1,5 +1,5 @@
 function [waveFeatures] = ExtractWaveFeatures(spikes, handles)
-%Calculates the spike features
+%EXTRACTWAVEFEATURES - Calculates the spike features
 
 % OLD version called wave_feature_jat.m
 
@@ -23,7 +23,7 @@ switch feature
             end
         else
             for i = 1:nspk                              % Replaces Wavelets Toolbox, if not available
-                [tempDecomp,~] = fix_wavedec(spikes(i,:),scales); % MAKE MY OWN FOR STUDEND COMPUTER
+                [tempDecomp,~] = fix_wavedec(spikes(i,:),scales); % MAKE MY OWN FOR STUDENT COMPUTER
                 spkDecompAll(i,1:lenspk) = tempDecomp(1:lenspk);
             end
         end

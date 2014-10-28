@@ -10,7 +10,7 @@ par.SWCycles = 100;                  % SPC iterations for each temperature (defa
 par.KNearNeighb=11;                  % number of nearest neighbors for SPC
 par.num_temp = floor((par.maxtemp ...
     -par.mintemp)/par.tempstep);     % total number of temperatures 
-par.min_clus = 60;                   % minimum size of a cluster (default 60)   
+par.min_clus = 40;                   % minimum size of a cluster (default 60)   
 par.max_clus = 13;                   % maximum number of clusters allowed (default 13)
 par.randomseed = 0;                  % if 0, random seed is taken as the clock value (default 0)
 %par.randomseed = 147;                % If not 0, random seed   

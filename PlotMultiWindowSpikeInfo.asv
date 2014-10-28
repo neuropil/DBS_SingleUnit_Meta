@@ -19,18 +19,3 @@ for i = 1:length(clustStruct)
     
 end
 
-
-%% Extract waveform data
-
-
-
-
-
-
-
-%%
-
-
-load fisheriris
-[cidx2,cmeans2] = kmeans(meas,2,'dist','sqeuclidean');
-[silh2,h] = silhouette(meas,cidx2,'sqeuclidean');

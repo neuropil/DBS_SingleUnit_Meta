@@ -1,11 +1,24 @@
 function [clustStruct, waveStruct, fileInfo, debug] = SpikeClusterMetaExtract()
-
+% SPIKECLUSTERMETAEXTRACT - Runs the spike extraction code on an entire
+% session and creates a struct output with results. Use debugging field to
+% determine if any files failed.
+%
+% Is run with PLOTMULTIWINDOWSPIKEINFO.m
+% DOES NOT REQUIRE INPUTS or HAVE ANY DEFAULT INPUTS
+%
+% Dependencies:
+% 1. set_parameters_AO.m
+% 2. SpikeThresholdCreate.m
+% 3. SpikeTimeExtract.m
+% 4. ExtractWaveFeatures.m
+% 5. ClusterSpikes.m
+% 6. GetClusIndex_WCalg.m
 
 % numOfspikes = vector of spike counts for all traces
 
 % Spike Debug Script
 
-cd('Y:\AlphaOmegaMatlabData\06_19_2014');
+cd('Y:\PreProcessEphysData\06_19_2014');
 fileDir = dir('*.mat');
 fileList = {fileDir.name};
 
@@ -31,7 +44,7 @@ for fli = 1:round(length(fileList)/2)
     for ei = 1:3
         
         tempSpkData = eval(strcat('CElectrode',num2str(ei)));
-        sampFreq = eval(strcat('CElectrode',num2str(ei),'_KHz'))*1000; % THIS NEEDS to CHANGE
+        sampFreq = sampFreqMER*1000; % THIS NEEDS to CHANGE
         
         handles.datatype = 'unClustered';
         

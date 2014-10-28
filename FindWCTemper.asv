@@ -8,24 +8,20 @@ aux0 = diff(tree(:,5));   % Changes in the first cluster size
 aux1 = diff(tree(:,6));   % Changes in the second cluster size
 aux2 = diff(tree(:,7));   % Changes in the third cluster size
 aux3 = diff(tree(:,8));   % Changes in the fourth cluster size
-aux4 = diff(tree(:,9));   % Changes in the fifth cluster size
-aux5 = diff(tree(:,10));   % Changes in the sixth cluster size
-aux6 = diff(tree(:,11));   % Changes in the seventh cluster size
+aux4 = diff(tree(:,9));   % Changes in the fourth cluster size
+aux5 = diff(tree(:,10));   % Changes in the fourth cluster size
+aux6 = diff(tree(:,11));   % Changes in the fourth cluster size
 
-% diffMat = zeros(size(tree,1)-1,length(5:size(tree,2)));
-% for dmi = 1:length(5:size(tree,2))
-%     dmI = dmi + 4;
-%     diffMat(:,dmi) = diff(tree(:,dmI));
-%     
-% end
-% 
-% temp1 = 1; 
-% for t = 1:num_temp - 1;
-%     if any(abs(diffMat(t,:)) > min_clus)
-%         temp1 = t + 1;   
-%     end
-% end
-        
+diffMat = zeros(size(tree,1)-1,length(5:size(tree,2)));
+for dmi = 1:length(5:size(tree,2))
+    dmI = dmi + 4;
+    diffMat(:,dmi) = diff(tree(:,dmI));
+    
+end
+
+
+
+for t = 1
 
 
 temp = 1;         % Initial value

@@ -72,3 +72,6 @@ delete *.mag
 delete *.edges
 delete *.param
 delete(fname_in); 
+delete([fname '.dg_01.lab']);
+delete([fname '.dg_01']);
+delete('Cluster.exe');
