@@ -42,6 +42,11 @@ end
 eleSelect = EleIDextract(eleSelect);
 
 
+
+
+
+
+
 cd(fileLoc);
 
 debug = struct;
@@ -130,7 +135,7 @@ function eleOut = EleIDextract(eleIn)
         
         sessIndex = ismember(sessAll,sessNums{snI});
         tempNumVec = eleAll(sessIndex);
-        eleOut{snI,1} = cellfun(@(x) str2double(x(length(x))), tempNumVec);
+        eleOut{snI,1} = cell2mat(cellfun(@(x) str2double(x(length(x))), tempNumVec));
         
     end
 
