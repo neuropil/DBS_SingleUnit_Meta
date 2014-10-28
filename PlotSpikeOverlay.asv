@@ -3,10 +3,12 @@ function PlotSpikeOverlay(spkWavForms)
 %   Detailed explanation goes here
 
 
+figure;
+
 % Create push button
-uicontrol('Style', 'pushbutton', 'String', 'Close',...
+btn = uicontrol('Style', 'pushbutton', 'String', 'Close',...
     'Position', [10 10 50 20],...
-    'Callback', 'close');
+    'Callback', 'cla');
 
 for i = 1:size(spkWavForms,1)
     
@@ -17,7 +19,6 @@ for i = 1:size(spkWavForms,1)
     hold on
     
 end
-
 
 
 
