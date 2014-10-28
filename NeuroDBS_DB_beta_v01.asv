@@ -43,13 +43,10 @@ recDepth = validatestring(depthNum, all_depths, mfilename, 'depthNum', 2);
 % Load in file of interest
 load(recDepth);
 
-% Get list of files in workspace
+
 allWorkspace = who;
 
-% Check if Electrode selected is present
 eleCheck = ismember(eleName, allWorkspace);
-
-%%%%% THIS IS WHERE I AM AT 10/28/2014
 
 % If the recording day has been clustered than run_analysis = 1
 switch run_analysis
