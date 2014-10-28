@@ -2,6 +2,10 @@
 
 [clustStruct, waveStruct, fileInfo, debug] = SpikeClusterMetaExtract();
 
+cd('Y:\MatlabDebugTemp');
+save('ClusterDebug.mat','clustStruct', 'waveStruct', 'fileInfo', 'debug')
+
+%%
 edit NeuroDBS_DB_beta_v01.m
 edit SpikeClustProfiler.m
 
@@ -22,13 +26,19 @@ for i = 1:length(clustStruct)
     
 end
 
+%%
+
+cd('Y:\MatlabDebugTemp');
+load('ClusterDebug.mat')
+
+
 %% Spike Plot look-through
 
 reInspect = zeros(length(clustStruct),1);
 for i = 1:length(clustStruct)
     
    spkWavForms =  waveStruct{i,1}.spkWaveforms;
-   PlotSpikeOverlay(spkWavForms)
+   PlotSpikeOverlay(spkWavForms, 1)
    disp(num2str(i))
    pause
    
@@ -42,11 +52,27 @@ end
 
 %% Recheck spike extract with REINSPECT group
 
+
+
 fileLoc = 'Y:\PreProcessEphysData\06_19_2014';
 eleNames = fileInfo(logical(reInspect),:);
 mNames = unique(fileInfo(logical(reInspect),1));
 
-[re_Clust, re_Wave, re_FI, re_debug] = SpikeClusterMetaExtract(fileLoc, mNames, eleNames);
+eleOut = EleIDextract(eleNames);
+
+[re_Clust, re_Wave, re_FI, re_debug] = SpikeClusterMetaExtract(fileLoc, mNames, eleOut, 1);
+
+%%
+cd('Y:\MatlabDebugTemp');
+save('ClusterDebugRE.mat','re_Clust', 're_Wave', 're_FI', 're_debug')
+
+%% GET NEURO_DBS working
+
+sessNum = '06_19_2014';
+depthNum = 'AbvTrgt_34_06015.mat';
+eleNum = 'CElectrode1';
+
+[CellInfo] = NeuroDBS_DB_beta_v01(sessNum, depthNum, eleNum);
 
 
 

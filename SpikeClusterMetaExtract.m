@@ -1,4 +1,4 @@
-function [clustStruct, waveStruct, fileInfo, debug] = SpikeClusterMetaExtract(fileLoc, matNames, eleSelect)
+function [clustStruct, waveStruct, fileInfo, debug] = SpikeClusterMetaExtract(fileLoc, matNames, eleSelect, usePlot)
 % SPIKECLUSTERMETAEXTRACT - Runs the spike extraction code on an entire
 % session and creates a struct output with results. Use debugging field to
 % determine if any files failed.
@@ -27,6 +27,7 @@ if nargin == 0
     fileIndex = randperm(length(fileNames),round(length(fileNames)/2));
     matNames = fileNames(fileIndex);
     eleSelect = repmat({[1 2 3]}, 1, length(matNames));
+    usePlot = 0;
     
 elseif nargin == 1
     
@@ -36,11 +37,9 @@ elseif nargin == 1
     fileIndex = randperm(length(fileNames),round(length(fileNames)/2));
     matNames = fileNames(fileIndex);
     eleSelect = repmat({[1 2 3]}, 1, length(matNames));
+    usePlot = 0;
     
 end
-
-eleSelect = EleIDextract(eleSelect);
-
 
 cd(fileLoc);
 
@@ -53,7 +52,7 @@ eleCount = 1;
 waveStruct = cell(3*round(length(matNames)/2),1);
 clustStruct = cell(3*round(length(matNames)/2),1);
 fileInfo = cell(3*round(length(matNames)/2),2);
-for fli = 1:round(length(matNames)/2)
+for fli = 1:length(matNames)
     
 
     fileName = matNames{fli};
@@ -77,7 +76,12 @@ for fli = 1:round(length(matNames)/2)
             [thrOut] = SpikeThresholdCreate(tempSpkData, handles, 'Min9sig');
             filtSpkData = thrOut.Filtered;
             threshold = thrOut.AveThresh;
-            [jat_Struct] = SpikeTimeExtract(filtSpkData, threshold, handles);
+            
+            if usePlot
+                [jat_Struct] = SpikeTimeExtract_Plot(filtSpkData, threshold, handles);
+            else
+                [jat_Struct] = SpikeTimeExtract(filtSpkData, threshold, handles);
+            end
             
             % Get threshold data and spike number
             if ~isstruct(jat_Struct)
@@ -113,27 +117,8 @@ for fli = 1:round(length(matNames)/2)
         
     end
     
-    fprintf('File # %d out of %d done! \n',fli, round(length(matNames)/2));
+    fprintf('File # %d out of %d done! \n',fli, length(matNames));
     
-end
-
-%% Electrode Index Function
-
-function eleOut = EleIDextract(eleIn)
-    
-    sessAll = eleIn(:,1);
-    sessNums = unique(eleIn(:,1));
-    eleAll = eleIn(:,2);
-    
-    eleOut = cell(length(sessNums),1);
-    for snI = 1:length(sessNums)
-        
-        sessIndex = ismember(sessAll,sessNums{snI});
-        tempNumVec = eleAll(sessIndex);
-        eleOut{snI,1} = cellfun(@(x) str2double(x(length(x))), tempNumVec);
-        
-    end
-
 end
 
 

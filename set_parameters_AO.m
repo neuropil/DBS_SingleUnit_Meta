@@ -25,7 +25,7 @@ par.tmax= 'all';                     % maximum time to load (default)
 par.tmin= 0;                         % starting time for loading (in sec)
 par.sr=sr;                           % sampling rate
 
-par.w_pre = round(sr/1000);  % number of pre-event data points stored 1 ms
+par.w_pre = round(sr/1000) + round(round(sr/1000)/2);  % number of pre-event data points stored 1 ms
 par.w_post = round(sr/1000) + round(round(sr/1000)/2);   % number of post-event data points stored 1.5 ms
 
 
