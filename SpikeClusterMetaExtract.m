@@ -65,7 +65,7 @@ for fli = 1:length(matNames)
         eleNum = eleSelect{fli}(ei);
         
         tempSpkData = eval(strcat('CElectrode',num2str(eleNum)));
-        sampFreq = sampFreqMER*1000; % THIS NEEDS to CHANGE
+        sampFreq = sampFreqMER*1000; 
         
         handles.datatype = 'unClustered';
         

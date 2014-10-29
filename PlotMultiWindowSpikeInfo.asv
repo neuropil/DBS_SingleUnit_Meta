@@ -69,7 +69,7 @@ save('ClusterDebugRE.mat','re_Clust', 're_Wave', 're_FI', 're_debug')
 %% GET NEURO_DBS working
 
 sessNum = '06_19_2014';
-depthNum = 'AbvTrgt_34_06015.mat';
+depthNum = 'AbvTrgt_35_05716.mat';
 eleNum = 'CElectrode1';
 
 [CellInfo] = NeuroDBS_DB_beta_v01(sessNum, depthNum, eleNum);
