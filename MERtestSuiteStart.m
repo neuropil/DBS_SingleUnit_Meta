@@ -62,6 +62,24 @@ switch chooseFuns
     case '8'
         edit NeuroDBS_DB_beta_v01.m % UNedited post waveform processing function
         edit SpikeClustProfiler.m % Allows selection of a single trace FOLLOWING use of PlotMultiWindowSpikeInfo.m
+        edit PlotMultiWindowSpikeInfo.m
+        edit spikeDebugNOwv.m
+        edit SpikeClusterMetaExtract.m
+        edit ExtractWaveFeatures.m
+        edit MER_Diary.m
+        edit SpikeTimeExtract.m
+        edit FSDE_Method.m
+        edit BrayCurtisClustMER.m
+        edit WvPTdist.m
+        edit PlotSpikeOverlay.m
+        edit SpikeClustProfiler.m
+        edit NeuroDBS_DB_beta_v01.m
+        edit MultiClusOverlayPlot.m
+        edit SpikeClustPCAProfiler.m
+        edit ClusterAnalysisJAT.m
+        edit ClustMERpca.m
+        edit JamiePanelLayout.m
+        edit BrayCurtisIndexMER.m
         
         
         

@@ -1,4 +1,11 @@
-function [] = SpikeClustPCAProfiler(voltTrace, sampFreq, clustID, waveForms, waveIndex, spkIndex, BrayCurtis)
+function [] = SpikeClustPCAProfiler(plotInStruct)
+
+voltTrace = plotInStruct.vt;
+sampFreq = plotInStruct.sf;
+clustID = plotInStruct.ci;
+waveForms = plotInStruct.wf;
+waveIndex = plotInStruct.wi;
+spkIndex = plotInStruct.si;
 
 sampMERFreq = sampFreq*1000;
 timeAx = linspace(0,length(voltTrace)/(sampMERFreq),length(voltTrace));

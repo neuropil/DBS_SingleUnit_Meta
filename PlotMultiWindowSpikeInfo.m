@@ -66,7 +66,7 @@ eleOut = EleIDextract(eleNames);
 cd('Y:\MatlabDebugTemp');
 save('ClusterDebugRE.mat','re_Clust', 're_Wave', 're_FI', 're_debug')
 
-%% GET NEURO_DBS working
+%% GET NEURO_DBS working 10/31/2014
 
 sessNum = '06_19_2014';
 depthNum = 'AbvTrgt_43_03320.mat';

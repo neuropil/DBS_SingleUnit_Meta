@@ -102,14 +102,14 @@ features.WidthPtT = WvPTdist(waveForms, sampFreq);
 
 % BrayCurtis analysis expects waveforms to be formatted by with each column
 % representing a new waveform and each row representing a time point
-WaveSimIndex = BrayCurtisClustMER(waveForms');
+WaveSimIndex = BrayCurtisClustMER(waveForms',0.55);
 
 % First & Second Derivative analysis
 features.FSDE_Values = FSDE_Method(waveForms');
     
 % Combine for WavePCA analysis
 featsForPCA = horzcat(features.Peak, features.Valley, features.Energy,...
-    features.WidthPtT, features.WaveSimIndex, features.FSDE_Values.FDmin,...
+    features.WidthPtT, features.FSDE_Values.FDmin,...
     features.FSDE_Values.SDmin, features.FSDE_Values.SDmax);
 
 %%%%%%%% NEED TO DO some testing
@@ -128,13 +128,17 @@ featsForPCA = horzcat(features.Peak, features.Valley, features.Energy,...
 
 %%% Run Cluster Profiler
 
-waveIndex = wave_Struct.spkWaveIndices;
-spikeIndex = wave_Struct.spkIndex;
-clustID = clustOut.ClustIndex;
-bcIndex = features.WaveSimIndex;
+plotInStruct.vt = filtSpkData;
+plotInStruct.sf = sampFreq;
+plotInStruct.ci = clustOut.ClustIndex;
+plotInStruct.wf = waveForms;
+plotInStruct.wi = wave_Struct.spkWaveIndices;
+plotInStruct.si = wave_Struct.spkIndex;
 
-SpikeClustPCAProfiler(filtSpkData, sampFreq, clustID, waveForms, waveIndex, spikeIndex, bcIndex)
 
+MultiClusOverlayPlot(plotInStruct, WaveSimIndex)
+
+SpikeClustPCAProfiler(plotInStruct)
 
 
 
