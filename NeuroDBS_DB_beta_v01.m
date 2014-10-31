@@ -102,7 +102,7 @@ features.WidthPtT = WvPTdist(waveForms, sampFreq);
 
 % BrayCurtis analysis expects waveforms to be formatted by with each column
 % representing a new waveform and each row representing a time point
-features.WaveSimIndex = BrayCurtisIndexMER(waveForms',cellName);
+WaveSimIndex = BrayCurtisClustMER(waveForms');
 
 % First & Second Derivative analysis
 features.FSDE_Values = FSDE_Method(waveForms');
@@ -114,11 +114,27 @@ featsForPCA = horzcat(features.Peak, features.Valley, features.Energy,...
 
 %%%%%%%% NEED TO DO some testing
 
-[~,features.WavePCs,~,~,Explained] = pca(featsForPCA);
+[~,features.WavePCs,~,~,~] = pca(featsForPCA);
 
+% pareto(Explained)
 
 % Derive Gaussian fit parameters for positive and negative
 % component of waveform (Felsen and Thompson method)
+
+
+%%% Add clustering
+
+[clustOut] = ClustMERpca(features.WavePCs);
+
+%%% Run Cluster Profiler
+
+waveIndex = wave_Struct.spkWaveIndices;
+spikeIndex = wave_Struct.spkIndex;
+clustID = clustOut.ClustIndex;
+bcIndex = features.WaveSimIndex;
+
+SpikeClustPCAProfiler(filtSpkData, sampFreq, clustID, waveForms, waveIndex, spikeIndex, bcIndex)
+
 
 
 

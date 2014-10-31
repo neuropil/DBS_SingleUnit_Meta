@@ -1,37 +1,12 @@
-function [outvals] = BrayCurtisIndexMER(tempWaves, fname)
+function [clusInd] = BrayCurtisClustMER(tempWaves)
 
 % Bray-Curtis similarity index (Lian et al., 2010: Signal Process 90:684-8)
 
 wvs = tempWaves;
 
-wb = waitbar(0,'Calculating...','name',fname);
-
-outvals = zeros(size(tempWaves'));
-for i = 1:length(wvs)
-    
-    waveTemp = repmat(wvs(:,i),[1,length(wvs)]);
-    
-    tempInd = 1 - (sum(abs(waveTemp - wvs)) ./ sum(abs(waveTemp) + abs(wvs)));
-
-    outvals(:,i) = tempInd';
-    
-    waitbar(i/length(tempWaves),wb,sprintf('%d / %d',i,length(tempWaves)));
-
-end
-close(wb)
-
-tempCell = cell(1,length(outvals));
-for ii = 1:length(outvals)
-    
-    tempCell{ii} = find(outvals(:,ii) > 0.75); 
-    
-end
 
 
 
-
-
-outvals = zeros(length(wvs),1);
 
 i = 1;
 tempIndex = 1:1:length(wvs);
@@ -76,17 +51,7 @@ while i ~= 0
 end
 
 
-for cui = 1:length(clusInd)
-    
-    tIndex = clusInd{cui};
-    
-    plot(tempWaves(:,tIndex),'k');
-    
-    pause
-    cla
-    
-    
-end
+
 
 
 

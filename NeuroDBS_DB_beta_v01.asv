@@ -114,11 +114,26 @@ featsForPCA = horzcat(features.Peak, features.Valley, features.Energy,...
 
 %%%%%%%% NEED TO DO some testing
 
-[~,features.WavePCs,~,~,Explained] = pca(featsForPCA);
+[~,features.WavePCs,~,~,~] = pca(featsForPCA);
 
+% pareto(Explained)
 
 % Derive Gaussian fit parameters for positive and negative
 % component of waveform (Felsen and Thompson method)
+
+
+%%% Add clustering
+
+[clustOut] = ClustMERpca(features.WavePCs);
+
+%%% Run Cluster Profiler
+
+waveIndex = wave_Struct.spkWaveIndices;
+spikeIndex = wave_Struct.spkIndex;
+clustID = clustOut.ClustIndex;
+
+SpikeClustPCAProfiler(filtSpkData, sampFreq, clustID, waveForms, waveIndex, spikeIndex)
+
 
 
 

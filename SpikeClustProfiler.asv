@@ -166,7 +166,54 @@ set(gca, 'Visible', 'off');
 
 
 
+tempTD = testdata(:,1:2);
+clustID = cluster(clusterObj,tempTD);
 
+clustAll = struct;
+plotIDots = {'r.','g.','b.','k.','m.'};
+plotILines = {'r-','g-','b-','k-','m-'};
+colors = 'rgbkm';
+for cli = 1:max(clustID)
+    
+    clustAll.(strcat('clust',num2str(cli))) = tempTD(clustID == cli,:);
+    figure(1);
+    hold on
+    scatter(clustAll.(strcat('clust',num2str(cli)))(:,1),...
+        clustAll.(strcat('clust',num2str(cli)))(:,2),...
+        100,...
+        plotIDots{cli});
+    
+    figure(2);
+    hold on
+    plot(waveForms(clustID == cli,:)',plotILines{cli})
+    
+    figure(3);
+    tempWavs = waveForms(clustID == cli,:);
+    for wavi = 1:size(tempWavs,1)
+        
+        y = tempWavs(wavi,:);
+        x = 1:1:length(tempWavs(1,:));
+        
+        patchline(x,y,'linestyle','-','edgecolor',colors(cli),'linewidth',1,'edgealpha',0.1);
+        hold on
+        
+    end
+    
+    
+end
+
+ptsymb = {'bs','r^','md','go','c+'};
+for i = 1:max(clustID)
+    clust = find(clustID == i);
+    plot3(testdata(clust,1), testdata(clust,2), testdata(clust,3), ptsymb{i});
+    hold on
+end
+hold off
+xlabel('Sepal Length');
+ylabel('Sepal Width');
+zlabel('Petal Length');
+view(-137,10);
+grid on
 
 
 

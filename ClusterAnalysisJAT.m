@@ -8,6 +8,17 @@
 % 4. Run Kmeans and Kmediods on Evalclusters suggestion
 % 5. Run GaussianMixedModel on Evalclusters suggestion
 
+% INPUTS
+% 1. features.WavePCs 
+
+% OUTPUTS
+% 1. IdealClust
+% 2. Mahalonbis distance for each cluster NEED TO CALCULATE
+% 3. Cluster Object
+% 4.
+% 5. 
+
+
 testdata = features.WavePCs(:,1:3);
 
 evalTests = {'CalinskiHarabasz','DaviesBouldin','Silhouette'};
@@ -15,29 +26,27 @@ evalCname = cell(3,1);
 evalResult = struct;
 for evI = 1:3
     evalCname{evI} = evalTests{evI};
-    evalResult.(evalTests{evI}) = evalclusters(testdata,'kmeans',evalTests{evI},'KList',1:6);
+    evalResult.(evalTests{evI}) = evalclusters(testdata,'kmeans',evalTests{evI},'KList',1:6); % or 'kmeans'
 end
 
 clustIdeal = min([evalResult.CalinskiHarabasz.OptimalK,...
                   evalResult.DaviesBouldin.OptimalK,...
                   evalResult.Silhouette.OptimalK]);
+clustIdeal = clustIdeal + 1;
+              
+clusterObj = fitgmdist(testdata(:,1:2),clustIdeal);
 
-[clustIndex,centerIndex,sumdist] = kmeans(testdata,clustIdeal,'Distance','cityblock',...
-                       'Display','final','Replicates',10);
+%%%%%%%%%%%%%%%% CHANGE with Mathworks
 
-figure;
-silhouData = silhouette(testdata,clustIndex,'city');
-silhouette(testdata,clustIndex,'city')
-xlabel 'Silhouette Value';
-ylabel 'Cluster';
-mean(silhouData)
+options = statset('MaxIter',1000);
+GMModel = fitgmdist(testdata(:,1:2),clustIdeal,'Options',options)
 
-obj = fitgmdist(testdata(:,1:2),clustIdeal);
+
 scatter(testdata(:,1),testdata(:,2),10,'.');hold on
-ezcontour(@(x,y)pdf(obj,[x y]),[-10000 20000],[-2500 2000]);
+ezcontour(@(x,y)pdf(clusterObj,[x y]),[-10000 20000],[-2500 2000]);
 
 tempTD = testdata(:,1:2);
-clustID = cluster(obj,tempTD);
+clustID = cluster(clusterObj,tempTD);
 
 clustAll = struct;
 plotIDots = {'r.','g.','b.','k.','m.'};
@@ -73,8 +82,8 @@ for cli = 1:max(clustID)
 end
 
 ptsymb = {'bs','r^','md','go','c+'};
-for i = 1:2
-    clust = find(clustIndex == i);
+for i = 1:max(clustID)
+    clust = find(clustID == i);
     plot3(testdata(clust,1), testdata(clust,2), testdata(clust,3), ptsymb{i});
     hold on
 end
@@ -85,9 +94,10 @@ zlabel('Petal Length');
 view(-137,10);
 grid on
 
+waveIndex = wave_Struct.spkWaveIndices;
+spikeIndex = wave_Struct.spkIndex
 
-
-
+SpikeClustPCAProfiler(filtSpkData, sampFreq, clustID, waveForms, waveIndex, spikeIndex)
 
 
 
