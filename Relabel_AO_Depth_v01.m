@@ -99,59 +99,110 @@ if doneTag == 0
     
     abDSName = cell(length(depthFiles),1);
     abDSDepthAct = cell(length(depthFiles),1);
+    abDSOrigName = cell(length(depthFiles),1);
     abDSDepthNum = nan(length(depthFiles),1);
     abDSNum = nan(length(depthFiles),1);
+    % For half finished files
+    abFinishNum = nan(length(depthFiles),1);
+    abFcount = 1;
+    %
     
     blDSName = cell(length(depthFiles),1);
     blDSDepthAct = cell(length(depthFiles),1);
+    blDSOrigName = cell(length(depthFiles),1);
     blDSDepthNum = nan(length(depthFiles),1);
     blDSNum = nan(length(depthFiles),1);
     
     atCount = 1;
     btCount = 1;
+    abVCount = 1;
+    blVCount = 1;
     for fii = 1:length(depthFiles)
         curFname = depthFiles{fii};
-        if ~strcmp(curFname(1),'-');
-            abDSName{atCount,1} = 'AbvTrgt';
+        
+        % If already modified skip
+        if ~isempty(strfind(curFname,'Trgt'));
             
-            abParts = strsplit(depthFiles{fii},'.');
-            tempDepth = abParts{1};
+            % Only Above targets considered NEED to update
+            abF_parts = strsplit(curFname,'_');
+            abFinishNum(abFcount) = str2double(abF_parts{2});
+            abFcount = abFcount + 1;
             
-            if length(tempDepth) > 6
-                stRempDepth = tempDepth(1:5);
-                abDSDepthNum(atCount,1) = str2double(stRempDepth) + 1;
-            else
-                abDSDepthNum(atCount,1) = str2double(tempDepth);
-            end
-            
-            abDSDepthNum(atCount,1) = str2double(tempDepth);
-            abDSDepthAct{atCount,1} = tempDepth;
-            abDSNum(atCount,1) = atCount;
-            atCount = atCount + 1;
+            continue
         else
-            blDSName{btCount,1} = 'BlwTrgt';
             
-            blParts = strsplit(depthFiles{fii},'.');
-            tempDepth = blParts{1};
-            
-            if length(tempDepth) > 6
-                stRempDepth = tempDepth(2:6);
-                blDSDepthNum(btCount,1) = abs(str2double(stRempDepth) + 1);
+            if ~strcmp(curFname(1),'-');
+                abDSName{atCount,1} = 'AbvTrgt';
                 
+                abParts = strsplit(depthFiles{fii},'.');
+                tempDepth = abParts{1};
+                
+                if length(tempDepth) > 6
+                    stRempDepth = tempDepth(1:5);
+                    newabTempDepth = num2str(str2double(stRempDepth) + abVCount);
+                    abDSDepthNum(atCount,1) = str2double(newabTempDepth);
+                    abDSDepthAct{atCount,1} = newabTempDepth;
+                    abVCount = abVCount + 1;
+                else
+                    abDSDepthNum(atCount,1) = str2double(tempDepth);
+                    abDSDepthAct{atCount,1} = tempDepth;
+                end
+                
+                abDSOrigName{atCount,1} = curFname;
+                
+                abDSNum(atCount,1) = atCount;
+                atCount = atCount + 1;
             else
-                blDSDepthNum(btCount,1) = abs(str2double(tempDepth));
+                blDSName{btCount,1} = 'BlwTrgt';
+                
+                blParts = strsplit(depthFiles{fii},'.');
+                tempDepth = blParts{1};
+                
+                if length(tempDepth) > 6
+                    stRempDepth = tempDepth(2:6);
+                    newblTempDepth1 = num2str(abs(str2double(stRempDepth) + blVCount));
+                    % pad with zeros
+                    if length(newblTempDepth1) ~= 5
+                        curLen = length(newblTempDepth1);
+                        numZeros = 5 - curLen;
+                        zeroPad = repmat('0',1,numZeros);
+                        newblTempDepth2 = [zeroPad , newblTempDepth1];
+                    else
+                        newblTempDepth2 = newblTempDepth1;
+                    end
+                    blDSDepthNum(btCount,1) = str2double(newblTempDepth2);
+                    blDSDepthAct{btCount,1} = ['-',newblTempDepth2];
+                    blVCount = blVCount + 1;
+                else
+                    blDSDepthNum(btCount,1) = abs(str2double(tempDepth));
+                    blDSDepthAct{btCount,1} = tempDepth;
+                end
+                
+                blDSOrigName{btCount,1} = curFname;
+
+                blDSNum(btCount,1) = btCount;
+                btCount = btCount + 1;
             end
             
-            blDSDepthAct{btCount,1} = tempDepth;
-            blDSNum(btCount,1) = btCount;
-            btCount = btCount + 1;
         end
+        
+    end
+    
+    % Also only exists for Above Target MUST update for below target
+    if any(~isnan(abFinishNum))
+        abFinishNum = abFinishNum(~isnan(abFinishNum));
+        maxVal = max(abFinishNum);
+        newStart = maxVal + 1;
+        abDSNum = flipud((newStart:1:newStart + (length(abDSNum(~isnan(abDSNum))) - 1))');
+    else
+        abDSNum = abDSNum(~isnan(abDSNum));
     end
     
     abDSName = abDSName(cellfun(@(x) ~isempty(x), abDSName));
     abDSDepthAct = abDSDepthAct(cellfun(@(x) ~isempty(x), abDSDepthAct));
     abDSDepthNum = abDSDepthNum(~isnan(abDSDepthNum));
-    abDSNum = abDSNum(~isnan(abDSNum));
+    abDSOrigName = abDSOrigName(cellfun(@(x) ~isempty(x), abDSOrigName));
+    abDSOrigName = flipud(abDSOrigName);
     
     % Above Target
     abvTable = table(abDSDepthNum,abDSName,abDSDepthAct,abDSNum);
@@ -159,7 +210,7 @@ if doneTag == 0
     
     for abi = 1:height(abvOutT)
         
-        abtempFname = [abvOutT.abDSDepthAct{abi},'.mat'];
+        abtempFname = abDSOrigName{abi};
         abnewFname = [abvOutT.abDSName{abi},'_',num2str(abi),'_',abvOutT.abDSDepthAct{abi},'.mat'];
         movefile(abtempFname,abnewFname);
         
@@ -169,6 +220,8 @@ if doneTag == 0
     blDSDepthAct = blDSDepthAct(cellfun(@(x) ~isempty(x), blDSDepthAct));
     blDSDepthNum = blDSDepthNum(~isnan(blDSDepthNum));
     blDSNum = blDSNum(~isnan(blDSNum));
+    blDSOrigName = blDSOrigName(cellfun(@(x) ~isempty(x), blDSOrigName));
+    blDSOrigName = flipud(blDSOrigName);
     
     % Below Target
     blwTable = table(blDSDepthNum,blDSName,blDSDepthAct,blDSNum);
@@ -176,7 +229,7 @@ if doneTag == 0
     
     for bli = 1:height(blwOutT)
         
-        bltempFname = [blwOutT.blDSDepthAct{bli},'.mat'];
+        bltempFname = blDSOrigName{bli};
         blnewFname = [blwOutT.blDSName{bli},'_',num2str(bli),'_',blwOutT.blDSDepthAct{bli}(2:end),'.mat'];
         movefile(bltempFname,blnewFname);
         
@@ -197,6 +250,7 @@ if doneTag == 0
         copyfile(alltempFname,allnewFname);
         
     end
+ 
     
 else
     

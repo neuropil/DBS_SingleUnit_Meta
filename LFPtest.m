@@ -1,50 +1,75 @@
-function [lfpID, lfpBool] = LFPtest(locName)
+function lfpBool = LFPtest(locName)
 
-if nargin == 0
-    loc2use = 'Y:\AlphaOmegaMatlabData\07_16_2014';
+locparts = strsplit(locName,'\');
+
+if length(locparts) == 3
+    loc2use = strcat('Y:\AlphaOmegaMatlabData\',locparts{3});
 else
-    loc2use = locName;
+    loc2use = strcat('Y:\AlphaOmegaMatlabData\',locparts{3},'\',locparts{4});
 end
 
+    
 cd(loc2use);
 
-dirTemp = dir('*.mat');
+dirTemp = dir('*.txt');
 
 dirTable = struct2table(dirTemp);
 
 fNames = dirTable.name;
 
-fNindex = round(length(fNames)/2);
-
-fName2use = fNames{fNindex};
-
-load(fName2use);
-
-if ~exist('CLFP1','var')
-    grandCV = 0;
-else
-    grandCV = mean([abs(std(CLFP1))/abs(mean(CLFP1)) ,...
-        abs(std(CLFP2))/abs(mean(CLFP2)) ,...
-        abs(std(CLFP3))/abs(mean(CLFP3))]);
-    
-    if sum([abs(std(CLFP1))/abs(mean(CLFP1)) <= 0.3,...
-                          abs(std(CLFP2))/abs(mean(CLFP2)) <= 0.3,...
-                          abs(std(CLFP3))/abs(mean(CLFP3)) <= 0.3]) >= 2
-        mostUnderCV = 1;
-    else
-        mostUnderCV = 0;
-    end
-    
-    
-end
-           
-       
-if grandCV <= 0.3 || mostUnderCV;
-    lfpID = 'NO';
+if ismember('lfp_no.txt',fNames)
     lfpBool = 0;
-else
-    lfpID = 'YES';
+    
+elseif ismember('lfp_yes.txt',fNames)
     lfpBool = 1;
+    
 end
-           
+
+% fNindex = round(length(fNames)/2);
+% 
+% fName2use = fNames{fNindex};
+% 
+% matInfo = matfile(fName2use);
+% mFList = whos(matInfo);
+% mFfnames = {mFList.name};
+% if ismember('CLFP1',mFfnames);
+%     
+%     load(fName2use,'CLFP1','CLFP2','CLFP3');
+% 
+% 
+%         
+%     if isa(CLFP1,'int16')
+%         CLFP1 = double(CLFP1);
+%         CLFP2 = double(CLFP2);
+%         CLFP3 = double(CLFP3);
+%     end
+%     
+%     grandCV = mean([std(abs(CLFP1))/mean(abs(CLFP1)) ,...
+%         std(abs(CLFP2))/mean(abs(CLFP2)) ,...
+%         std(abs(CLFP3))/mean(abs(CLFP3))]);
+%     
+%     if sum([abs(std(CLFP1))/abs(mean(CLFP1)) <= 0.3,...
+%             abs(std(CLFP2))/abs(mean(CLFP2)) <= 0.3,...
+%             abs(std(CLFP3))/abs(mean(CLFP3)) <= 0.3]) >= 2
+%         mostUnderCV = 1;
+%     else
+%         mostUnderCV = 0;
+%     end
+%     
+%     
+% 
+%     
+%     
+%     if grandCV <= 0.3 || mostUnderCV;
+%         lfpID = 'NO';
+%         lfpBool = 0;
+%     else
+%         lfpID = 'YES';
+%         lfpBool = 1;
+%     end
+%     
+% else
+%     lfpID = 'NO';
+%     lfpBool = 0;
+% end
            
