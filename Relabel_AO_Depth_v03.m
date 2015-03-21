@@ -1,4 +1,4 @@
-function Relabel_AO_Depth_v02
+function Relabel_AO_Depth_v03
 % RELABEL_AO_DEPTH VERSION 0.1
 % This function will cycle through Recording days, rename and repack files
 % based on pertient data. 
@@ -52,45 +52,57 @@ for fdir = 1:length(foldernamesFinal)
             else
                 % If not complete, cycle through each recording in the
                 % Session
-                
+                cd(preProLoc);
                 allFilesL = dir('*.txt');
                 allFilesLn = {allFilesL.name};
                 
-                if ~isempty(allFilesLn) && ismember('ReSavedDone.txt',allFilesLn)
+                if ~isempty(allFilesLn) && ismember('ProcessDoneFinal.txt',allFilesLn)
                     continue
                 else
                     for tsfI = 1:length(toSaveFiles)
                         
-                        [~, ~, ~, ~, ~] = CleanPackData(toSaveFiles{tsfI}, lfpBool, preProLoc);
+                       [~] = CleanPackData(toSaveFiles{tsfI}, lfpBool, preProLoc);
                         
                     end
-                    save('ReSavedDone.txt')
+                    save('ProcessDoneFinal.txt')
                 end
                 
             end
             
         end % End of Date loop for Sets
-        save('ProcessDoneFinal.txt')
+
         
         
     else % it does not have sets
         
         dai = nan;
+        % Detemine if files need to be renamed and rename them
         [preProLoc, lfpBool, toSaveFiles] = RenameCheckLFP(dateLoc, dai, diractual);
-
+        
         if isnan(lfpBool) && isnan(toSaveFiles)
             continue
         else
             
-            for tsfI = 1:length(toSaveFiles)
+            % If not complete, cycle through each recording in the
+            % Session
+            cd(preProLoc);
+            allFilesL = dir('*.txt');
+            allFilesLn = {allFilesL.name};
+            if ~isempty(allFilesLn) && ismember('ProcessDoneFinal.txt',allFilesLn)
+                continue
+            else
                 
-                [~, ~, ~, ~, ~] = CleanPackData(toSaveFiles{tsfI}, lfpBool, preProLoc);
-                
+                for tsfI = 1:length(toSaveFiles)
+                    
+                     [~] = CleanPackData(toSaveFiles{tsfI}, lfpBool, preProLoc);
+                    
+                end
+                save('ProcessDoneFinal.txt')
             end
         end
         
     end % End of test for Sets
-    save('ProcessDoneFinal.txt')
+    
 end
 
 end % End of main function
@@ -180,71 +192,12 @@ if doneTag == 0
     ttlChecklist = ttlChecklist(cellfun(@(x) ~isempty(x), ttlChecklist));
     
     % Create table to determine if pair or not 
-    ttlcom1 = cell(length(ttlChecklist),1);
-    ttlcom2 = cell(length(ttlChecklist),2);
-    ttlmC1 = 1;
-    ttlmC2 = 1;
-    for ttlc2 = 1:length(ttlChecklist)
-         
-        tempTTLc = ttlChecklist{ttlc2};
+    for tv1 = 1:length(ttlChecklist)
         
-        if length(tempTTLc) > 10;
-            ttlcom2{ttlmC2,1} = tempTTLc;
-            
-            ttlCparts = strsplit(tempTTLc,'.');
-            ttlNp = ttlCparts{1};
-            lastVal = str2double(ttlNp(end));
-            
-            % If negative value beginning with 'n'
-            if strcmp(ttlNp(1),'n')
-                firstF = strcat(ttlNp(1:6),'.mat');
-                if lastVal > 1;
-                    addVals = cell(length(1:lastVal - 1),1);
-                    for nvi = 1:lastVal - 1;
-                        addVals{nvi} = strcat(ttlNp(1:7),num2str(nvi),'.mat');
-                    end
-                    outVals = [firstF;addVals;tempTTLc];
-                else
-                    outVals = {firstF;tempTTLc};
-                end
-            % If positive value    
-            else
-                firstF = strcat(ttlNp(1:5),'.mat');
-                if lastVal > 1;
-                    addVals = cell(length(1:lastVal - 1),1);
-                    for nvi = 1:lastVal - 1;
-                        addVals{nvi} = strcat(ttlNp(1:6),num2str(nvi),'.mat');
-                    end
-                    outVals = [firstF;addVals;tempTTLc];
-                else
-                    outVals = {firstF;tempTTLc};
-                end
-            end
-            ttlcom2{ttlmC2,2} = outVals;
-            ttlmC2 = ttlmC2 + 1;
-        else
-            ttlcom1{ttlmC1} = tempTTLc;
-            ttlmC1 = ttlmC1 + 1;
-        end
-    end
-    
-    % Clean up files
-    ttlcom1 = ttlcom1(cellfun(@(x) ~isempty(x), ttlcom1));
-    ttlcom2 = ttlcom2(cellfun(@(x) ~isempty(x), ttlcom2(:,1)),:);
-%     Send through processing function
-    for tv1 = 1:length(ttlcom1)
-        
-        Add_TTL_Vecs(ttlcom1{tv1})
+        Add_TTL_Vecs(ttlChecklist{tv1})
         
     end
-    
-    for tv2 = 1:length(ttlcom2)
-        
-        Add_TTL_Vecs(ttlcom2(tv2,:))
-        
-    end
-    
-    
+
     fiExtInd = cellfun(@(x) length(x) > 10, depthFiles);
     numExts = sum(fiExtInd);
     % Get actual names, so index can be dynamic in for loop
@@ -566,7 +519,7 @@ end % End of function
 
 %% CleanPackData Function
 
-function [sampFreqMER, sampFreqLFP, timeStart, timeEnd, ProcDone] = CleanPackData(recDname, LFPcheck, preProLoc)
+function [ProcDone] = CleanPackData(recDname, LFPcheck, preProLoc)
 % CLEANPACKDATA
 % Performs repacking of recording files. Removes unnecessary files created by 
 % AlphaOmega system. Resaves in duplicate directory with fewer files.
@@ -587,82 +540,106 @@ cd(preProLoc)
 
 load(recDname)
 
-if LFPcheck
-    
-    sampFreqMER = CElectrode1_KHz;
-    sampFreqLFP = CLFP1_KHz;
-    timeStart = CElectrode1_TimeBegin;
-    timeEnd = CElectrode1_TimeEnd;
-    ProcDone = 1;
-    
-    if exist('C1_DI001_Up','var')
-        
-        ttlInfo.ttl_up = C1_DI001_Up;
-        ttlInfo.ttl_dn = C1_DI001_Down;
-        ttlInfo.ttl_sf = C1_DI001_KHz;
-        ttlInfo.ttlTimeBegin = C1_DI001_TimeBegin;
-        ttlInfo.ttlTimeEnd = C1_DI001_TimeEnd;
-        
-        tsIndex_UP = ttl_revised_spTimes(CElectrode1, CElectrode1_KHz,...
-            CElectrode1_TimeBegin, C1_DI001_KHz, C1_DI001_TimeBegin, ttlInfo.ttl_up);
-        
-        tsIndex_DN = ttl_revised_spTimes(CElectrode1, CElectrode1_KHz,...
-            CElectrode1_TimeBegin, C1_DI001_KHz, C1_DI001_TimeBegin, ttlInfo.ttl_dn);
+dNchkL = whos;
+dNchkN = {dNchkL.name};
 
-        fprintf('Saving %s \n',recDname);
-        
-        save(recDname,'CElectrode1','CElectrode2','CElectrode3',...
-            'sampFreqMER','sampFreqLFP','timeStart','timeEnd','ProcDone',...
-            'CLFP1','CLFP2','CLFP3','ttlInfo');
-        
-        ttlInfo.ttl_upI = tsIndex_UP;
-        ttlInfo.ttl_dnI = tsIndex_DN;
-        
-    else
-        
-        fprintf('Saving %s \n',recDname);
-        
-        save(recDname,'CElectrode1','CElectrode2','CElectrode3',...
-            'sampFreqMER','sampFreqLFP','timeStart','timeEnd','ProcDone',...
-            'CLFP1','CLFP2','CLFP3');
-    end
-    
+if ismember('ProcDone',dNchkN)
+    ProcDone = nan;
+    return
 else
     
-    sampFreqMER = CElectrode1_KHz;
-    sampFreqLFP = NaN;
-    timeStart = CElectrode1_TimeBegin;
-    timeEnd = CElectrode1_TimeEnd;
-    ProcDone = 1;
+    mer = struct;
+    lfp = struct;
     
-    if exist('C1_DI001_Up','var')
+    if LFPcheck
         
-        ttlInfo.ttl_up = C1_DI001_Up;
-        ttlInfo.ttl_dn = C1_DI001_Down;
-        ttlInfo.ttl_sf = C1_DI001_KHz;
-        ttlInfo.ttlTimeBegin = C1_DI001_TimeBegin;
-        ttlInfo.ttlTimeEnd = C1_DI001_TimeEnd;
+        mer.sampFreqHz = CElectrode1_KHz*1000;
+        mer.timeStart = CElectrode1_TimeBegin;
+        mer.timeEnd = CElectrode1_TimeEnd;
+        lfp.sampFreqHz = CLFP1_KHz*1000;
+        lfp.timeStart = CLFP1_TimeBegin;
+        lfp.timeEnd = CLFP1_TimeEnd;
         
-        [tsIndex_UP] = ttl_revised_spTimes(CElectrode1, CElectrode1_KHz,...
-            CElectrode1_TimeBegin, C1_DI001_KHz, C1_DI001_TimeBegin, ttlInfo.ttl_up);
-        
-        [tsIndex_DN] = ttl_revised_spTimes(CElectrode1, CElectrode1_KHz,...
-            CElectrode1_TimeBegin, C1_DI001_KHz, C1_DI001_TimeBegin, ttlInfo.ttl_dn);
+        merdata = struct;
+        lfpdata = struct;
+        for elI = 1:3
+            merdata.(strcat('ele',num2str(elI))).sfPoints = 1:1:length(eval(['CElectrode',num2str(elI)]));
+            merdata.(strcat('ele',num2str(elI))).timePoints =...
+                mer.timeStart + merdata.(strcat('ele',num2str(elI))).sfPoints./mer.sampFreqHz;
+            
+            lfpdata.(strcat('lfp',num2str(elI))).sfPoints = 1:1:length(eval(['CLFP',num2str(elI)]));
+            lfpdata.(strcat('lfp',num2str(elI))).timePoints =...
+                lfp.timeStart + lfpdata.(strcat('lfp',num2str(elI))).sfPoints./lfp.sampFreqHz;
+        end
 
-        ttlInfo.ttl_upI = tsIndex_UP;
-        ttlInfo.ttl_dnI = tsIndex_DN;
+        ProcDone = 1;
         
-        fprintf('Saving %s \n',recDname);
-        
-        save(recDname,'CElectrode1','CElectrode2','CElectrode3',...
-            'sampFreqMER','timeStart','timeEnd','ProcDone','ttlInfo');
+        if exist('C1_DI001_Up','var')
+            
+            ttlInfo.ttl_up = C1_DI001_Up;
+            ttlInfo.ttl_dn = C1_DI001_Down;
+            ttlInfo.ttl_sf = C1_DI001_KHz;
+            ttlInfo.ttlTimeBegin = C1_DI001_TimeBegin;
+            ttlInfo.ttlTimeEnd = C1_DI001_TimeEnd;
+            ttlInfo.ttlTimesUp = TTL_sp_UP;
+            ttlInfo.ttlTimesDn = TTL_sp_DN;
+            
+            fprintf('Saving %s \n',recDname);
+            
+            save(recDname,'CElectrode1','CElectrode2','CElectrode3',...
+                'mer','merdata','lfp','lfpdata','ttlInfo',...
+                'ProcDone','CLFP1','CLFP2','CLFP3');
+                
+        else
+            
+            fprintf('Saving %s \n',recDname);
+            
+            save(recDname,'CElectrode1','CElectrode2','CElectrode3',...
+                'mer','merdata','lfp','lfpdata',...
+                'ProcDone','CLFP1','CLFP2','CLFP3');
+            
+            ProcDone = 1;
+            
+        end
         
     else
         
-        fprintf('Saving %s \n',recDname);
+        mer.sampFreqHz = CElectrode1_KHz*1000;
+        mer.timeStart = CElectrode1_TimeBegin;
+        mer.timeEnd = CElectrode1_TimeEnd;
         
-        save(recDname,'CElectrode1','CElectrode2','CElectrode3',...
-            'sampFreqMER','timeStart','timeEnd','ProcDone');
+        merdata = struct;
+        for elI = 1:3
+            merdata.(strcat('ele',num2str(elI))).sfPoints = 1:1:length(eval(['CElectrode',num2str(elI)]));
+            merdata.(strcat('ele',num2str(elI))).timePoints =...
+                mer.timeStart + merdata.(strcat('ele',num2str(elI))).sfPoints./mer.sampFreqHz;
+        end
+        
+        ProcDone = 1;
+        
+        if exist('C1_DI001_Up','var')
+            
+            ttlInfo.ttl_up = C1_DI001_Up;
+            ttlInfo.ttl_dn = C1_DI001_Down;
+            ttlInfo.ttl_sf = C1_DI001_KHz;
+            ttlInfo.ttlTimeBegin = C1_DI001_TimeBegin;
+            ttlInfo.ttlTimeEnd = C1_DI001_TimeEnd;
+            ttlInfo.ttlTimesUp = TTL_sp_UP;
+            ttlInfo.ttlTimesDn = TTL_sp_DN;
+            
+            fprintf('Saving %s \n',recDname);
+            
+            save(recDname,'CElectrode1','CElectrode2','CElectrode3',...
+                'mer','merdata','ttlInfo','ProcDone');
+            
+        else
+            
+            fprintf('Saving %s \n',recDname);
+            
+            save(recDname,'CElectrode1','CElectrode2','CElectrode3',...
+                'mer','merdata','ProcDone');
+            
+        end
         
     end
     
@@ -734,6 +711,9 @@ end % End of determine whether already done
 
 cd(newLoc)
 
+allFilesL = dir('*.txt');
+allFilesLn = {allFilesL.name};
+
 if ~isempty(allFilesLn) && ismember('RMd_files.txt',allFilesLn)
     toSaveFiles = GetDirFileList(newLoc);
     lfpBool = LFPtest(newLoc);
@@ -741,7 +721,7 @@ if ~isempty(allFilesLn) && ismember('RMd_files.txt',allFilesLn)
 else
     
     toProcNames = GetDirFileList(newLoc);
-    [~, lfpBool] = LFPtest(newLoc);
+    lfpBool = LFPtest(newLoc);
     toSaveFiles = cell(length(toProcNames),1);
     sfcount = 1;
     
@@ -769,7 +749,7 @@ else
     emptyInd = cellfun(@(x) ~isempty(x), toSaveFiles);
     toSaveFiles = toSaveFiles(emptyInd,:);
     save('RMd_files.txt')
-    cd(actFileDir)
+    cd(tempdateLoc)
     save('RMd_files.txt')
     cd(newLoc)
 end
@@ -783,184 +763,24 @@ end % END of function
 
 function [] = Add_TTL_Vecs(ttlInput)
 
-if ischar(ttlInput)
-    ttlInput = {ttlInput};
-end
+lVarNames = Get_ListOfVars(ttlInput);
+
+load(ttlInput)
+block = build_block_AO(C1_DI001_Down,...
+    C1_DI001_Up,...
+    C1_DI001_TimeBegin,...
+    C1_DI001_KHz);
 
 
-if length(ttlInput) == 1
-    
-    ttlInput = char(ttlInput);
-    
-    load(ttlInput);
-    TTL_sp_UP = C1_DI001_Up; %#ok<NASGU>
-    TTL_sp_DN = C1_DI001_Down; %#ok<NASGU>
-    
-    save(ttlInput,'TTL_sp_UP','-append')
-    save(ttlInput,'TTL_sp_DN','-append')
-    
-    
-else
-    lastflag = 0;
-    for tcci = 1:length(ttlInput{2})
-        
-        
-        
-        matFileName = ttlInput{2}{tcci,1};
-        lVarNames = Get_ListOfVars(matFileName);
-        
-        ttlCheckt = cellfun(@(x) ~isempty(strfind(x,'C1_DI0')), lVarNames);
-        
-            
-        if tcci == 1 && sum(ttlCheckt) ~= 0;
-            
-            depthFilesA_1 = dir('*.mat');
-            depthFiles = {depthFilesA_1.name};
-            
-            firstB = ttlInput{2}{tcci};
-            
-            try
-                load(firstB);
-            catch
-                notFound = 1;
-                startInt = 1;
-                while notFound
-                    
-                    if length(firstB) == 10
-                        newName = strcat(firstB(1:5),...
-                            num2str(str2double(firstB(6)) + startInt),...
-                            firstB(7:10));
-                    else
-                        newName = strcat(firstB(1:4),...
-                            num2str(str2double(firstB(5)) + startInt),...
-                            firstB(6:9));
-                    end
-                    
-                    if ismember(newName,depthFiles)
-                        firstB = newName;
-                        notFound = 0;
-                    else
-                        startInt = startInt + 1;
-                    end
-                    
-                end
-                load(firstB);
-            end
-            
+[toAddTTL_UP, toAddTTL_DN] = Get_ttl_Times_AO(block);
 
-            
-            TTL_sp_UP = C1_DI001_Up; %#ok<NASGU>
-            TTL_sp_DN = C1_DI001_Down; %#ok<NASGU>
-            
-            save(firstB,'TTL_sp_UP','-append')
-            save(firstB,'TTL_sp_DN','-append')
-            
-            clearvars(lVarNames{:})
-            
-            lastflag = 1;
-            
-        elseif sum(ttlCheckt) == 0
-            
-            depthFilesA_1 = dir('*.mat');
-            depthFiles = {depthFilesA_1.name};
-            
-            firstB = ttlInput{2}{tcci};
-            
-            try
-                load(firstB);
-            catch
-                notFound = 1;
-                startInt = 1;
-                while notFound
-                    
-                    if length(firstB) == 10
-                        newName = strcat(firstB(1:5),...
-                            num2str(str2double(firstB(6)) + startInt),...
-                            firstB(7:10));
-                    else
-                        newName = strcat(firstB(1:4),...
-                            num2str(str2double(firstB(5)) + startInt),...
-                            firstB(6:9));
-                    end
-                    
-                    if ismember(newName,depthFiles)
-                        firstB = newName;
-                        notFound = 0;
-                    else
-                        startInt = startInt + 1;
-                    end
-                    
-                end
-                load(firstB);
-            end
- 
-            TTL_sp_UP = []; %#ok<NASGU>
-            TTL_sp_DN = []; %#ok<NASGU>
-            
-            save(firstB,'TTL_sp_UP','-append')
-            save(firstB,'TTL_sp_DN','-append')
+TTL_sp_UP = toAddTTL_UP; %#ok<NASGU>
+TTL_sp_DN = toAddTTL_DN; %#ok<NASGU>
 
-        % If last trial and already run 
+save(ttlInput,'TTL_sp_UP','-append')
+save(ttlInput,'TTL_sp_DN','-append')
 
+clearvars(lVarNames{:})
             
-        % If last trial and not run yet
-        elseif ~lastflag && tcci == length(ttlInput{2})
-            
-            load(ttlInput{2}{tcci})
-            
-            TTL_sp_UP = C1_DI001_Up; %#ok<NASGU>
-            TTL_sp_DN = C1_DI001_Down; %#ok<NASGU>
-            
-            save(matFileName,'TTL_sp_UP','-append')
-            save(matFileName,'TTL_sp_DN','-append')
-            
-            clearvars(lVarNames{:})
-            
-        else
-            
-            lastflag = 1;
-            
-            load(ttlInput{2}{tcci})
-            [block1] = build_blocks_AO_abv(CElectrode1_TimeBegin,...
-                CElectrode1_TimeEnd,...
-                CElectrode1_KHz,...
-                C1_DI001_Down,...
-                C1_DI001_Up,...
-                C1_DI001_TimeBegin,...
-                C1_DI001_TimeEnd,...
-                C1_DI001_KHz);
-            
-            clearvars(lVarNames{:})
-            
-            smatFileName = ttlInput{2}{tcci - 1};
-            slVarNames = Get_ListOfVars(smatFileName);
-            
-            load(ttlInput{2}{tcci - 1})
-            [block2] = build_blocks_AO_abv(CElectrode1_TimeBegin,...
-                CElectrode1_TimeEnd,...
-                CElectrode1_KHz,...
-                C1_DI001_Down,...
-                C1_DI001_Up,...
-                C1_DI001_TimeBegin,...
-                C1_DI001_TimeEnd,...
-                C1_DI001_KHz);
-            
-            [toAddTTL_UP , toAddTTL_DN] = get_revised_TTL_sf(block1, block2);
-            
-            TTL_sp_UP = toAddTTL_UP; %#ok<NASGU>
-            TTL_sp_DN = toAddTTL_DN; %#ok<NASGU>
-            
-            save(matFileName,'TTL_sp_UP','-append')
-            save(matFileName,'TTL_sp_DN','-append')
-            
-            clearvars(slVarNames{:})
-            
-        end
-    end
-    
-    
-end
-
-
 
 end
