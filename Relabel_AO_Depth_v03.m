@@ -559,18 +559,6 @@ else
         lfp.sampFreqHz = CLFP1_KHz*1000;
         lfp.timeStart = CLFP1_TimeBegin;
         lfp.timeEnd = CLFP1_TimeEnd;
-        
-        merdata = struct;
-        lfpdata = struct;
-        for elI = 1:3
-            merdata.(strcat('ele',num2str(elI))).sfPoints = 1:1:length(eval(['CElectrode',num2str(elI)]));
-            merdata.(strcat('ele',num2str(elI))).timePoints =...
-                mer.timeStart + merdata.(strcat('ele',num2str(elI))).sfPoints./mer.sampFreqHz;
-            
-            lfpdata.(strcat('lfp',num2str(elI))).sfPoints = 1:1:length(eval(['CLFP',num2str(elI)]));
-            lfpdata.(strcat('lfp',num2str(elI))).timePoints =...
-                lfp.timeStart + lfpdata.(strcat('lfp',num2str(elI))).sfPoints./lfp.sampFreqHz;
-        end
 
         ProcDone = 1;
         
@@ -587,7 +575,7 @@ else
             fprintf('Saving %s \n',recDname);
             
             save(recDname,'CElectrode1','CElectrode2','CElectrode3',...
-                'mer','merdata','lfp','lfpdata','ttlInfo',...
+                'mer','lfp','ttlInfo',...
                 'ProcDone','CLFP1','CLFP2','CLFP3');
                 
         else
@@ -595,7 +583,7 @@ else
             fprintf('Saving %s \n',recDname);
             
             save(recDname,'CElectrode1','CElectrode2','CElectrode3',...
-                'mer','merdata','lfp','lfpdata',...
+                'mer','lfp',...
                 'ProcDone','CLFP1','CLFP2','CLFP3');
             
             ProcDone = 1;
@@ -607,13 +595,6 @@ else
         mer.sampFreqHz = CElectrode1_KHz*1000;
         mer.timeStart = CElectrode1_TimeBegin;
         mer.timeEnd = CElectrode1_TimeEnd;
-        
-        merdata = struct;
-        for elI = 1:3
-            merdata.(strcat('ele',num2str(elI))).sfPoints = 1:1:length(eval(['CElectrode',num2str(elI)]));
-            merdata.(strcat('ele',num2str(elI))).timePoints =...
-                mer.timeStart + merdata.(strcat('ele',num2str(elI))).sfPoints./mer.sampFreqHz;
-        end
         
         ProcDone = 1;
         
@@ -630,14 +611,14 @@ else
             fprintf('Saving %s \n',recDname);
             
             save(recDname,'CElectrode1','CElectrode2','CElectrode3',...
-                'mer','merdata','ttlInfo','ProcDone');
+                'mer','ttlInfo','ProcDone');
             
         else
             
             fprintf('Saving %s \n',recDname);
             
             save(recDname,'CElectrode1','CElectrode2','CElectrode3',...
-                'mer','merdata','ProcDone');
+                'mer','ProcDone');
             
         end
         
@@ -763,7 +744,7 @@ end % END of function
 
 function [] = Add_TTL_Vecs(ttlInput)
 
-lVarNames = Get_ListOfVars(ttlInput);
+% lVarNames = Get_ListOfVars(ttlInput);
 
 load(ttlInput)
 block = build_block_AO(C1_DI001_Down,...
@@ -780,7 +761,7 @@ TTL_sp_DN = toAddTTL_DN; %#ok<NASGU>
 save(ttlInput,'TTL_sp_UP','-append')
 save(ttlInput,'TTL_sp_DN','-append')
 
-clearvars(lVarNames{:})
+% clearvars(lVarNames{:})
             
 
 end
