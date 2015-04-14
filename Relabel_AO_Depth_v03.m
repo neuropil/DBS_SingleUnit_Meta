@@ -538,12 +538,18 @@ function [ProcDone] = CleanPackData(recDname, LFPcheck, preProLoc)
 
 cd(preProLoc)
 
-load(recDname)
+% 1. Do a matfile check
+% 2. Load in files separately 
 
-dNchkL = whos;
-dNchkN = {dNchkL.name};
+matAll = matfile(recDname);
+matFns = who(matAll);
 
-if ismember('ProcDone',dNchkN)
+% load(recDname)
+
+% dNchkL = whos;
+% dNchkN = {dNchkL.name};
+
+if ismember('ProcDone',matFns)
     ProcDone = nan;
     return
 else
@@ -553,6 +559,13 @@ else
     
     if LFPcheck
         
+        load(recDname,'CElectrode1_KHz')
+        load(recDname,'CElectrode1_TimeBegin')
+        load(recDname,'CElectrode1_TimeEnd')
+        load(recDname,'CLFP1_KHz')
+        load(recDname,'CLFP1_TimeBegin')
+        load(recDname,'CLFP1_TimeEnd')
+                                
         mer.sampFreqHz = CElectrode1_KHz*1000;
         mer.timeStart = CElectrode1_TimeBegin;
         mer.timeEnd = CElectrode1_TimeEnd;
@@ -564,6 +577,14 @@ else
         
         if exist('C1_DI001_Up','var')
             
+            load(recDname,'C1_DI001_Up')
+            load(recDname,'C1_DI001_Down')
+            load(recDname,'C1_DI001_KHz')
+            load(recDname,'C1_DI001_TimeBegin')
+            load(recDname,'C1_DI001_TimeEnd')
+            load(recDname,'TTL_sp_UP')
+            load(recDname,'TTL_sp_DN')
+            
             ttlInfo.ttl_up = C1_DI001_Up;
             ttlInfo.ttl_dn = C1_DI001_Down;
             ttlInfo.ttl_sf = C1_DI001_KHz;
@@ -574,23 +595,41 @@ else
             
             fprintf('Saving %s \n',recDname);
             
-            save(recDname,'CElectrode1','CElectrode2','CElectrode3',...
+            load(recDname,'CElectrode1')
+%             load(recDname,'CElectrode2')
+%             load(recDname,'CElectrode3')
+            load(recDname,'CLFP1')
+%             load(recDname,'CLFP2')
+%             load(recDname,'CLFP3')
+                                
+            save(recDname,...
                 'mer','lfp','ttlInfo',...
-                'ProcDone','CLFP1','CLFP2','CLFP3');
+                'ProcDone','-append');
                 
         else
             
             fprintf('Saving %s \n',recDname);
             
-            save(recDname,'CElectrode1','CElectrode2','CElectrode3',...
+            load(recDname,'CElectrode1')
+%             load(recDname,'CElectrode2')
+%             load(recDname,'CElectrode3')
+            load(recDname,'CLFP1')
+%             load(recDname,'CLFP2')
+%             load(recDname,'CLFP3')
+            
+            save(recDname,...
                 'mer','lfp',...
-                'ProcDone','CLFP1','CLFP2','CLFP3');
+                'ProcDone','-append');
             
             ProcDone = 1;
             
         end
         
     else
+        
+        load(recDname,'CElectrode1_KHz')
+        load(recDname,'CElectrode1_TimeBegin')
+        load(recDname,'CElectrode1_TimeEnd')
         
         mer.sampFreqHz = CElectrode1_KHz*1000;
         mer.timeStart = CElectrode1_TimeBegin;
@@ -600,6 +639,14 @@ else
         
         if exist('C1_DI001_Up','var')
             
+            load(recDname,'C1_DI001_Up')
+            load(recDname,'C1_DI001_Down')
+            load(recDname,'C1_DI001_KHz')
+            load(recDname,'C1_DI001_TimeBegin')
+            load(recDname,'C1_DI001_TimeEnd')
+            load(recDname,'TTL_sp_UP')
+            load(recDname,'TTL_sp_DN')
+            
             ttlInfo.ttl_up = C1_DI001_Up;
             ttlInfo.ttl_dn = C1_DI001_Down;
             ttlInfo.ttl_sf = C1_DI001_KHz;
@@ -610,15 +657,29 @@ else
             
             fprintf('Saving %s \n',recDname);
             
-            save(recDname,'CElectrode1','CElectrode2','CElectrode3',...
-                'mer','ttlInfo','ProcDone');
+            load(recDname,'CElectrode1')
+%             load(recDname,'CElectrode2')
+%             load(recDname,'CElectrode3')
+            load(recDname,'CLFP1')
+%             load(recDname,'CLFP2')
+%             load(recDname,'CLFP3')
+            
+            save(recDname,...
+                'mer','ttlInfo','ProcDone','-append');
             
         else
             
             fprintf('Saving %s \n',recDname);
             
-            save(recDname,'CElectrode1','CElectrode2','CElectrode3',...
-                'mer','ProcDone');
+            load(recDname,'CElectrode1')
+%             load(recDname,'CElectrode2')
+%             load(recDname,'CElectrode3')
+            load(recDname,'CLFP1')
+%             load(recDname,'CLFP2')
+%             load(recDname,'CLFP3')
+            
+            save(recDname,...
+                'mer','ProcDone','-append');
             
         end
         
@@ -710,8 +771,12 @@ else
     for pfi = 1:length(toProcNames)
         
         tempDepthFile = toProcNames{pfi};
-        load(tempDepthFile)
-        
+        try
+            load(tempDepthFile)
+        catch
+            load(tempDepthFile,'CElectrode1_KHz')
+            load(tempDepthFile,'CElectrode1')
+        end
         tempSfreq = CElectrode1_KHz * 1000;
         tempRecTime = numel(CElectrode1)/tempSfreq;
         
