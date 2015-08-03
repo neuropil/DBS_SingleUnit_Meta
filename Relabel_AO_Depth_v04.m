@@ -1,5 +1,5 @@
-function Relabel_AO_Depth_v03
-% RELABEL_AO_DEPTH VERSION 0.03
+function Relabel_AO_Depth_v04
+% RELABEL_AO_DEPTH VERSION 0.04
 % This function will cycle through Recording days, rename and repack files
 % based on pertient data. 
 % Defaults: 
@@ -309,31 +309,82 @@ if doneTag == 0
         % There is a mismatch between when the Original file has files that
         % the NEW file does not
         
-        newOrgNames = cellfun(@(x) strcat(x,'_org'), orgMatNames, 'UniformOutput', false);
-        for orE = 1:length(orgMatNames)
-            combFstruct.(orgMatNames{orE}) = [];
-            combFstruct.(newOrgNames{orE}) = [];
+        % newExtNames
+        % 1). Compare matfile for Original and Extension
+        % 2). Get Master List of field names with Overlap = 0, Unique Org =
+        %     1, and Unique Ext = 2;
+        % 3). For loop through Master List
+        % 4). If present in both read in data for both fields
+        % 5). If present in one or the other, read in and create empty
+        % vector
+        orgMatNamesComp = {orgMatinfo.name};
+        extMatNamesComp = {extMatinfo.name};
+        
+        allNames = unique([orgMatNamesComp , extMatNamesComp]);
+        
+        allNid = zeros(length(allNames),1);
+        for idA = 1:length(allNames);
+            if ismember(allNames{idA},extMatNamesComp) && ismember(allNames{idA},orgMatNamesComp);
+                allNid(idA,1) = 1;
+            elseif ismember(allNames{idA},orgMatNamesComp);
+                allNid(idA,1) = 2;
+            elseif ismember(allNames{idA},extMatNamesComp);
+                allNid(idA,1) = 3;
+            end
         end
         
-        for exO = 1:length(newOrgNames)
-            combFstruct.(newOrgNames{exO}) = eval(orgMatNames{exO});
+        allExtNames = cellfun(@(x) strcat(x,'_ext'), allNames, 'UniformOutput', false);
+        allOrgNames = cellfun(@(x) strcat(x,'_org'), allNames, 'UniformOutput', false);
+        
+        for iiii = 1:length(allNames);
+            combFstruct.(allNames{iiii}) = [];
+            combCase = allNid(iiii);
+            switch combCase
+                case 1 % Field is present in both
+                    combFstruct.(allExtNames{iiii}) = extMatobj.(allNames{iiii});
+                    combFstruct.(allOrgNames{iiii}) = orgMatobj.(allNames{iiii});
+                case 2 % Field is only present in original
+                    combFstruct.(allExtNames{iiii}) = [];
+                    combFstruct.(allOrgNames{iiii}) = orgMatobj.(allNames{iiii});
+                case 3 % Field is only present in extension
+                    combFstruct.(allExtNames{iiii}) = extMatobj.(allNames{iiii});
+                    combFstruct.(allOrgNames{iiii}) = [];
+            end
+            %
+            fprintf('Field %d out of %d DONE! \n',iiii,length(allNames))
         end
+
+        
+        
+        
+%         for orE = 1:length(orgMatNames)
+%             combFstruct.(orgMatNames{orE}) = [];
+%             combFstruct.(newOrgNames{orE}) = [];
+%         end
+%         
+%         for exO = 1:length(newOrgNames)
+%             combFstruct.(newOrgNames{exO}) = eval(orgMatNames{exO});
+%         end
         
         % If there is a mismatch between Orig and Ext
         % Then create empty place holders in Ext name struct
-        comCheckEx = ~ismember(orgMatNames,extMatNames);
-        if any(comCheckEx)
-            comCheckList = orgMatNames(comCheckEx);
-            newExtNamesAdd = cellfun(@(x) strcat(x,'_ext'), comCheckList, 'UniformOutput', false);
-            for nei = 1:length(newExtNamesAdd) 
-                combFstruct.(newExtNamesAdd{nei}) = [];
-            end
-            newExtNamesUse = cellfun(@(x) strcat(x,'_ext'), orgMatNames, 'UniformOutput', false);
-        else
-            
-            newExtNamesUse = newExtNames;
-            
-        end
+%         comCheckEx = ~ismember(orgMatNames,extMatNames);
+%         if any(comCheckEx)
+%             comCheckList = orgMatNames(comCheckEx);
+%             newExtNamesAdd = cellfun(@(x) strcat(x,'_ext'), comCheckList, 'UniformOutput', false);
+%             for nei = 1:length(newExtNamesAdd) 
+%                 combFstruct.(newExtNamesAdd{nei}) = [];
+%             end
+%             newExtNamesUse = cellfun(@(x) strcat(x,'_ext'), orgMatNames, 'UniformOutput', false);
+%         else
+%             
+%             newExtNamesUse = newExtNames;
+%             
+%         end
+        
+        
+        
+        
         
         
         
@@ -349,33 +400,43 @@ if doneTag == 0
         
         % Set up combine code
         if combineFlag
-            
             % Cycle through each variable name in struct
-            for exC = 1:length(orgMatNames)
+            for exC = 1:length(allNames)
                 % Get name and variable element number
-                tempExName = newOrgNames{exC};
-                tempExType = numel(combFstruct.(newOrgNames{exC}));
+                tempExName = allNames{exC};
+                temp_allNid = allNid(exC);
+                switch temp_allNid
+                    case 1
+                        tempExType = numel(combFstruct.(allOrgNames{exC}));
+                    case 2
+                        tempExType = numel(combFstruct.(allOrgNames{exC}));
+                    case 3
+                        tempExType = numel(combFstruct.(allExtNames{exC}));
+                end
                 % Check size of variable
                 if tempExType == 1;
                     % Check whether Time or Other stable Value
                     if ~isempty(strfind(tempExName,'Time')) % if == 1 then has to do with Time
                         % Check if Begin or End
                         if ~isempty(strfind(tempExName,'Begin'))
-                            combFstruct.(orgMatNames{exC}) = combFstruct.(newOrgNames{exC});
+                            combFstruct.(allNames{exC}) = combFstruct.(allOrgNames{exC});
                         else % It is the Time End
-                            combFstruct.(orgMatNames{exC}) = combFstruct.(newExtNamesUse{exC});
+                            try combFstruct.(allNames{exC}) = combFstruct.(allExtNames{exC});
+                            catch
+                                combFstruct.(allNames{exC}) = [];
+                            end
                         end
                     else % Is a static variable
-                        combFstruct.(orgMatNames{exC}) = combFstruct.(newOrgNames{exC});
+                        combFstruct.(allNames{exC}) = combFstruct.(allOrgNames{exC});
                     end
                 else % Is Spike or LFP voltage trace
                     
-                    combFstruct.(orgMatNames{exC}) = [combFstruct.(newOrgNames{exC}),combFstruct.(newExtNamesUse{exC})];
+                    combFstruct.(allNames{exC}) = [combFstruct.(allOrgNames{exC}),combFstruct.(allExtNames{exC})];
 
                 end
                 % Overwrite workspace OrgVal with new OrgVal for final save
-                clear(orgMatNames{exC})
-                eval(sprintf('%s = %s;', orgMatNames{exC}, 'combFstruct.(orgMatNames{exC})'));
+                clear(allNames{exC})
+                eval(sprintf('%s = %s;', allNames{exC}, 'combFstruct.(allNames{exC})'));
             end
         else
             continue
@@ -383,7 +444,7 @@ if doneTag == 0
         
         % Add ttl index names to extMatNames
         % Save new raw data file and delete EXT file
-        save(findOrig,orgMatNames{:})
+        save(findOrig,allNames{:})
         % Remove from depthFiles
         depthFiles(ismember(depthFiles,fiExtFnames{fiiT})) = [];
         % Delete extraneous ext file
