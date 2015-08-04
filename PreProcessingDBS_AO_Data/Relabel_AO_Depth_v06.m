@@ -1,5 +1,5 @@
-function Relabel_AO_Depth_v05
-% RELABEL_AO_DEPTH VERSION 0.05
+function Relabel_AO_Depth_v06
+% RELABEL_AO_DEPTH VERSION 0.06
 % This function will cycle through Recording days, rename and repack files
 % based on pertient data. 
 % Defaults: 
@@ -11,6 +11,7 @@ function Relabel_AO_Depth_v05
 % #########################################################################
 % REVISION HISTORY
 % Recent Update: 7/13/2015
+% Recent Update: 8/4/2015 Version 06 - Updated to evaluate NeuroOmega files
 % #########################################################################
 % #########################################################################
 
@@ -878,20 +879,21 @@ end
                   fprintf('Saving TTL Data for %s \n',recDname);
                   
                   save(recDname,'ttlInfo','-append');
+              end
+              
+              if LFPcheck
                   
-                  if LFPcheck
-                      
-                      lfp = struct;
-                      
-                      lfp.sampFreqHz = CLFP1_KHz*1000;
-                      lfp.timeStart = CLFP1_TimeBegin;
-                      lfp.timeEnd = CLFP1_TimeEnd;
-                      
-                      fprintf('Saving LFP Data for %s \n',recDname);
-                      
-                      save(recDname,'lfp','CLFP1','CLFP2','CLFP3','-append');
-                  end 
-              end % End of test for ttl and LFP
+                  lfp = struct;
+                  
+                  lfp.sampFreqHz = CLFP1_KHz*1000;
+                  lfp.timeStart = CLFP1_TimeBegin;
+                  lfp.timeEnd = CLFP1_TimeEnd;
+                  
+                  fprintf('Saving LFP Data for %s \n',recDname);
+                  
+                  save(recDname,'lfp','CLFP1','CLFP2','CLFP3','-append');
+              end
+              % End of test for ttl and LFP
           end
       end % Determine already done
       

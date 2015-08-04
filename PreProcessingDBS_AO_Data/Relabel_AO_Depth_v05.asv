@@ -1,5 +1,5 @@
-function Relabel_AO_Depth_v05
-% RELABEL_AO_DEPTH VERSION 0.05
+function Relabel_AO_Depth_v06
+% RELABEL_AO_DEPTH VERSION 0.06
 % This function will cycle through Recording days, rename and repack files
 % based on pertient data. 
 % Defaults: 
@@ -11,6 +11,7 @@ function Relabel_AO_Depth_v05
 % #########################################################################
 % REVISION HISTORY
 % Recent Update: 7/13/2015
+% Recent Update: Version 06 - Updated to evaluate NeuroOmega files
 % #########################################################################
 % #########################################################################
 
