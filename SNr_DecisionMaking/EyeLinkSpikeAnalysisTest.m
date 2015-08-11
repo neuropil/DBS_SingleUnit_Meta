@@ -15,7 +15,7 @@ load('AbvTrgt_50_00077.mat','ttlInfo','mer')
 %% Load Eyelink data
 
 cd('Y:\EyeLink_Data')
-load('DJ_07082015.mat')
+load('DJ07082015.mat')
 
 trialDuration = PDS.timing.trialend(~isnan(PDS.timing.trialend));
 

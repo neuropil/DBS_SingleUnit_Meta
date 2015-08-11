@@ -1,56 +1,70 @@
-function [] = SNr_DM_SpikeAnalysis_v01(eleFile,date,AOfile,eyeLink)
+function [] = SNr_DM_SpikeAnalysis_v02(cell_Number)
 
+
+%%
+
+dbaseLoc = 'Y:\HumanNeuronDB';
+cd(dbaseLoc)
 
 %% To do
 
-% 1. Deal with more than one cluster
-% 2. Deal with correct TTL times
-
-
-
-
-
+% 1). Fix PSTH cut off
 
 
 %% Event Times from AO preprocessed data Spike Time from Offline Sorter
 
-% CASE 1 from 07/08/2015
+%%%%%%%%%%%%%%%%%%%%%%% CASE 1 from 07/08/2015
 % Recording data 00077
 
 % Electrode Example 1: 07082015_srg1_set1_a50_00077_1.mat
-% 
+% Electrode Example 2: 07082015_srg1_set1_a50_00077_2.mat
+% Electrode Example 3: 07082015_srg1_set1_a50_00077_3.mat
 
-% CASE 2 from 07/30/2015
+
+
+
+%%%%%%%%%%%%%%%%%%%%%% CASE 2 from 07/30/2015
 % Recording data 
 
 % Electrode Example 1: 
-% 
+% Electrode Example 2:
+% Electrode Example 3:
 
 
-
-% Load raw spike information sampling frequency
-cd('Y:\RawSortedSpikeData\SNr_CNS_SpikeFiles')
-load(eleFile,'adc001');
 
 %%
 
+%%%%%%%%%%%%%%%%%%%%%%% CASE 1 from 07/08/2015
 % Date Example 1: 07_08_2015
 % TTL Example 1:AbvTrgt_50_00077.mat
 
+%%%%%%%%%%%%%%%%%%%%%% CASE 2 from 07/30/2015
+% Date Example 1: 07_30_2015
+% TTL Example 1: 
+
 % Load raw TTL information time stamps and frequency
-dateLoc = strcat('Y:\PreProcessEphysData\',date);
-cd(dateLoc)
-load(AOfile,'ttlInfo','mer')
+
 
 %% Load Eyelink data
 
-% EyeLink Example 1: DJ_07082015.mat
+%%%%%%%%%%%%%%%%%%%%%%% CASE 1 from 07/08/2015
+% EyeLink Example 1: DJ07082015.mat
 
-cd('Y:\EyeLink_Data')
 
-load(eyeLink)
+%%%%%%%%%%%%%%%%%%%%%% CASE 2 from 07/30/2015
+% EyeLink Example 1: DJ07302015.mat
 
-trialDuration = PDS.timing.trialend(~isnan(PDS.timing.trialend));
+
+%% Load Data
+load(cell_Number)
+
+%%
+behData = humanStruct.behInfo;
+ttlInfo = humanStruct.ttlInfo;
+spkEvs = humanStruct.spikeEvents;
+mer = humanStruct.merInfo; 
+
+trialDuration = behData.PDS.timing.trialend(~isnan(behData.PDS.timing.trialend));
 
 %% TTL times from AO
 
@@ -65,10 +79,17 @@ ttlTimes2use = ttlTimes(ttRealInd1);
 
 %% Offline Sorter data
 
+% Spike times from Offline sorter (i.e. tempClusInd) are arbitrarily relative to 0
+
+% mer.timeStart is the start of the clock relative to that recording depth
+% start
+
+
+
 % Cluster ID vector
-clusterS = adc001(:,2); %#ok<NODEF>
+clusterS = spkEvs(:,2); 
 % Time stamps 
-timestamps = adc001(:,3);
+timestamps = spkEvs(:,3);
 % Cluster indices
 numClusts = max(clusterS);
 allClusts = struct;
@@ -112,10 +133,11 @@ end
 %%
 
 % Trial Points
-fixPointOn = PDS.timing.fpon(~isnan(PDS.timing.fpon(:,1)),1);
-motionOn = PDS.timing.motionon(~isnan(PDS.timing.motionon(:,1)),1);
-targetOn = PDS.timing.targon(~isnan(PDS.timing.targon(:,1)),1);
+fixPointOn = behData.PDS.timing.fpon(~isnan(behData.PDS.timing.fpon(:,1)),1);
+motionOn = behData.PDS.timing.motionon(~isnan(behData.PDS.timing.motionon(:,1)),1);
+targetOn = behData.PDS.timing.targon(~isnan(behData.PDS.timing.targon(:,1)),1);
 
+%%
 
 for clustI3 = 1:numClusts
     
@@ -181,38 +203,85 @@ for clustI3 = 1:numClusts
     set(gca,'XTickLabel',xtickStr)
     set(gca,'YTick',[1 round(botY/2) botY])
     
-    edges = 0:0.25:round(max(trialDuration),1);
+%     window = 0.25;
+%     maxTime = max(trialDuration);
+%     binNum = ceil(maxTime/window);
+%     
+%     binData = zeros(numtrials,binNum);
+% 
+%     for tII = 1:numtrials
+%         startWin = 0;
+%         endWin = window;
+%         
+%         for bI = 1:binNum
+%             tempTrial = tempSpkTimes{1,numtrials};
+%             
+%             spikeNums = tempTrial >= startWin & tempTrial <= endWin;
+%             
+%             binData(tII,bI) = sum(spikeNums);
+%             
+%             startWin = startWin + window;
+%             endWin = endWin + window;
+%             
+%         end
+%     end
+%     
+%     meanFR = mean(binData)/window;
+%     stdFR = std(binData)/window;
+%     semFR = (stdFR / sqrt(numtrials))/window;
+%     upFR = meanFR + semFR;
+%     dnFR = meanFR - semFR;
+%     
+%     time = linspace(0,maxTime,binNum);
+%     subplot(2,1,2);
+%     hold on
+%     plot(time,meanFR,'k');
+%     hold on
+%     plot(time,upFR,'r');
+%     plot(time,dnFR,'r');
+%     xlim([0 floor(maxTime)]);
+    
+    
+    edges = 0:0.2:floor(max(trialDuration));
     peth = nan(length(edges),numtrials);
     
     for jj = 1:numtrials
-        histCs = histcounts(tempSpkTimes{1,jj},edges)./0.25;
+        histCs = histcounts(tempSpkTimes{1,jj},edges)./0.2;
         peth(histCs~=0,jj) = histCs(histCs~=0);
     end
+      
+    meanFR = nanmean(peth,2);
     
-    peth = peth';
+    stdPETH = peth';
+    stdFR = nanstd(stdPETH); %#ok<UDIM>
+    meanFR2plot = meanFR(~isnan(meanFR));
+    edges2plot = edges(~isnan(meanFR));
+    std2plot = stdFR(~isnan(meanFR));
     
-    meanFR = nanmean(peth);
-    meanFR(isnan(meanFR)) = 0;
-    stdFR = nanstd(peth);
-    upSTDfr = meanFR + stdFR;
-    dnSTDfr = meanFR - stdFR;
-    maxFR = round(max(meanFR));
+    semFR = transpose(std2plot/sqrt(numtrials));
+    upSEM = meanFR2plot + semFR;
+    dnSEM = meanFR2plot - semFR;
+%     stdFR = nanstd(peth);
+%     upSTDfr = meanFR + stdFR;
+%     dnSTDfr = meanFR - stdFR;
+    maxFR = round(max(upSEM));
     
     subplot(2,1,2);
     hold on
-    plot(edges,meanFR,'k');
-%     plot(edges,upSTDfr,'r');
-%     plot(edges,dnSTDfr,'r');
+    plot(edges2plot,meanFR2plot,'k');
+    plot(edges2plot,upSEM,'r');
+    plot(edges2plot,dnSEM,'r');
 %     barH = bar(meanFR);
 %     barH.FaceColor = 'black';
 
 
-    set(gca,'YTick',[0 round(maxFR/2) maxFR]);
+    set(gca,'YTick',[0 round(maxFR/2,2) maxFR]);
     set(gca,'YLim',[0 maxFR]);
+    
     ylabel('Mean FR (Hz)');
-    xlim([0 8])
-    set(gca,'XTick',[0 round(length(histCs)/2) length(histCs)]);
-    set(gca,'XTickLabel',[0 round(max(trialDuration)/2) round(max(trialDuration))]);
+    xlim([0 edges2plot(length(edges2plot))])
+    set(gca,'XTick',[0 round(edges2plot(length(edges2plot))/2,2) edges2plot(length(edges2plot))]);
+    set(gca,'XTickLabel',xtickStr);
     xlabel('Time (s)')
     title('PSTH')
     

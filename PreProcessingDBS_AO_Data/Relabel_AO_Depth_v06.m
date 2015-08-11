@@ -458,7 +458,11 @@ if doneTag == 0
                     if ~isempty(strfind(tempExName,'Time')) % if == 1 then has to do with Time
                         % Check if Begin or End
                         if ~isempty(strfind(tempExName,'Begin'))
-                            combFstruct.(allNames{exC}) = combFstruct.(allOrgNames{exC});
+                            if isempty(combFstruct.(allOrgNames{exC}))
+                                combFstruct.(allNames{exC}) = combFstruct.(allExtNames{exC});
+                            else
+                                combFstruct.(allNames{exC}) = combFstruct.(allOrgNames{exC});
+                            end
                         else % It is the Time End
                             try combFstruct.(allNames{exC}) = combFstruct.(allExtNames{exC});
                             catch
