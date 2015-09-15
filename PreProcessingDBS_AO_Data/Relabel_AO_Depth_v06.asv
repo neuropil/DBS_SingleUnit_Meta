@@ -258,6 +258,40 @@ if doneTag == 0
         % Check for TTL file names
         ttlCheck = cellfun(@(x) ~isempty(strfind(x,'C1_DI00')), tTLNames);
         
+        
+        getTTLitems = cellfun(@(x) strsplit(x,'_'),matInfo(ttlLogic),'UniformOutput',false);
+        getFinalVal = cellfun(@(x) x{3},getTTLitems, 'UniformOutput',false);
+        getUpODown = ismember(getFinalVal,{'Up','Down'});
+        useIndUD = ttlLogInd(getUpODown);
+        
+        
+        
+        if ttlCheck1
+            % Check if there are 'C1' files indicative of a TTL signature
+            %     ttLoc = cellfun(@(x) ismember(x,{'C1_DI001_Down','C1_DI001_Up'}),matInfo);
+            % Check if they are Up and Down vectors
+            if ~isempty(useIndUD)
+                % Find the first index of UP or DOWN
+                % Load in vector
+                tempTTLch = matAll.(matInfo{useIndUD(1)});
+                % If length of vector is greater than one and the file
+                % name length indicates it is an extension then analyze
+                if length(tempTTLch) > 2
+                    ttlCheck1 = 1;
+                else
+                    ttlCheck1 = 0;
+                end
+            else
+                ttlCheck1 = 0;
+            end
+        else
+            ttlCheck1 = 0;
+        end
+        
+        
+        
+        
+        
         % Check if there are 'C1' files indicative of a TTL signature
         if sum(ttlCheck) > 0
             ttlCheck2 = cellfun(@(x) ismember(x,{'C1_DI001_Down','C1_DI001_Up'}),tTLNames);

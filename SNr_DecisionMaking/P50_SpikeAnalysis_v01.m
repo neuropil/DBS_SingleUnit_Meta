@@ -56,7 +56,15 @@ end
 numtrials = numel(ttlTimes2use);
 
 %% Extract Spikes for each trial
-trialDur = 1; % in secs
+
+% Trial Points
+firstClick = 0.1;
+secondClick = firstClick + humanStruct.behInfo.clicksec;
+
+trialDur = secondClick + 0.5; % in secs
+
+%%
+
 % Cell Array of trial Spikes by trial number
 for cli2 = 1:numClusts
     
@@ -82,9 +90,7 @@ end
 
 %%
 
-% Trial Points
-firstClick = 0.1;
-secondClick = firstClick + 0.1;
+
 
 %%
 
@@ -96,6 +102,12 @@ for clustI3 = 1:numClusts
     subplot(2,1,1);
     botY = 0;
     topY = 1;
+    
+    chSpikes = allClusts.(strcat('clust',num2str(clustI3))).trialSpikes;
+    if sum(cellfun(@(x) ~isempty(x), chSpikes)) == 0
+        continue
+    end
+    
     
     for ni = 1:numtrials
         
@@ -199,8 +211,8 @@ for clustI3 = 1:numClusts
     
     [~,fName,~] = fileparts(cell_Number);
     figName = strcat(fName,'_c_',num2str(clustI3),'.jpg');
-%     cd('Y:\TempP50images')
-%     saveas(gcf,figName);
+    cd('Y:\TempP50images')
+    saveas(gcf,figName);
     close all
     
     outPut.(strcat('c',num2str(clustI3))).timeBin = timeBin;

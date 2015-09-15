@@ -1,5 +1,5 @@
-function Relabel_AO_Depth_v06
-% RELABEL_AO_DEPTH VERSION 0.06
+function Relabel_AO_Depth_v07
+% RELABEL_AO_DEPTH VERSION 0.07
 % This function will cycle through Recording days, rename and repack files
 % based on pertient data. 
 % Defaults: 
@@ -12,6 +12,7 @@ function Relabel_AO_Depth_v06
 % REVISION HISTORY
 % Recent Update: 7/13/2015
 % Recent Update: 8/4/2015 Version 06 - Updated to evaluate NeuroOmega files
+% Recent Update: 9/15/2015 Version 06 - Updated to evaluate EEG data
 % #########################################################################
 % #########################################################################
 
@@ -63,6 +64,8 @@ for fdir = 1:length(foldernamesFinal)
                 neuroOmFlag = 0;
             end
             
+            
+            
             if neuroOmFlag
                 
                 reNameMat1 = dir('*.mat');
@@ -89,6 +92,7 @@ for fdir = 1:length(foldernamesFinal)
             if isnan(lfpBool) && isnan(toSaveFiles)
                 continue
             else
+                [eegFlag, eegIDs] = checkForEEG(dateLoc);
                 % If not complete, cycle through each recording in the
                 % Session
                 cd(preProLoc);
@@ -100,7 +104,7 @@ for fdir = 1:length(foldernamesFinal)
                 else
                     for tsfI = 1:length(toSaveFiles)
                         
-                       [~] = CleanPackData(toSaveFiles{tsfI}, lfpBool, preProLoc, neuroOmFlag);
+                       [~] = CleanPackData(toSaveFiles{tsfI}, lfpBool, preProLoc, neuroOmFlag, eegFlag, eegIDs);
                         
                     end
                     save('ProcessDoneFinal.txt')
@@ -125,6 +129,8 @@ for fdir = 1:length(foldernamesFinal)
             neuroOmFlag = 0;
         end
         
+       
+        
         if neuroOmFlag
             
             reNameMat1 = dir('*.mat');
@@ -137,7 +143,25 @@ for fdir = 1:length(foldernamesFinal)
                 for rnI = 1:length(reNameMat2)
                     
                     [~,oldName,ext] = fileparts(reNameMat2{rnI});
-                    newName = strcat(oldName(5:length(oldName) - 5),'.mat');
+                    
+                    if length(oldName) == 14
+                        tempNumNa = oldName(5:9);
+                        numNaParts = strsplit(tempNumNa,'.');
+                        newName = strcat('0',[numNaParts{:}],'.mat');
+                    elseif length(oldName) == 15
+                        
+                        if strcmp(oldName(5),'-')
+                            tempNumNa = oldName(6:10);
+                            numNaParts = strsplit(tempNumNa,'.');
+                            newName = strcat('-0',[numNaParts{:}],'.mat');
+                        else
+                            tempNumNa = oldName(5:10);
+                            numNaParts = strsplit(tempNumNa,'.');
+                            newName = strcat([numNaParts{:}],'.mat');
+                        end
+                        
+                    end
+
                     movefile([oldName,ext],newName)
                     
                 end
@@ -151,6 +175,7 @@ for fdir = 1:length(foldernamesFinal)
             continue
         else
             
+            [eegFlag, eegIDs] = checkForEEG(dateLoc);
             % If not complete, cycle through each recording in the
             % Session
             cd(preProLoc);
@@ -162,7 +187,7 @@ for fdir = 1:length(foldernamesFinal)
                 
                 for tsfI = 1:length(toSaveFiles)
                     
-                     [~] = CleanPackData(toSaveFiles{tsfI}, lfpBool, preProLoc, neuroOmFlag);
+                     [~] = CleanPackData(toSaveFiles{tsfI}, lfpBool, preProLoc, neuroOmFlag, eegFlag, eegIDs);
                     
                 end
                 save('ProcessDoneFinal.txt')
@@ -249,6 +274,9 @@ if doneTag == 0
     
     ttlChecklist = cell(length(depthFiles),1);
     ttlCc = 1;
+    
+    %%%%% TO DO : GIVE EACH TTL ITS own STRUCT of INFO in case C1 name
+    %%%%% change
     for ttlfi = 1:length(depthFiles)
         
         tTLMatobj = matfile(depthFiles{ttlfi});
@@ -256,17 +284,32 @@ if doneTag == 0
         tTLNames = {tTLMatinfo.name};
         
         % Check for TTL file names
-        ttlCheck = cellfun(@(x) ~isempty(strfind(x,'C1_DI00')), tTLNames);
         
+        if neuroOmFlag
+            ttlCheck = cellfun(@(x) ~isempty(strfind(x,'CDIG_IN')), tTLNames);
+            ttlLogInd = find(ttlCheck);
+        else
+            ttlCheck = cellfun(@(x) ~isempty(strfind(x,'C1_DI00')), tTLNames);
+            ttlLogInd = find(ttlCheck);
+        end
+        getTTLitems = cellfun(@(x) strsplit(x,'_'),tTLNames(ttlCheck),'UniformOutput',false);
+        if neuroOmFlag
+            getFinalVal = cellfun(@(x) x{4},getTTLitems, 'UniformOutput',false);
+        else
+            getFinalVal = cellfun(@(x) x{3},getTTLitems, 'UniformOutput',false);
+        end
+        getUpODown = ismember(getFinalVal,{'Up','Down'});
+        useIndUD = ttlLogInd(getUpODown);
+
         % Check if there are 'C1' files indicative of a TTL signature
         if sum(ttlCheck) > 0
-            ttlCheck2 = cellfun(@(x) ismember(x,{'C1_DI001_Down','C1_DI001_Up'}),tTLNames);
+%             ttlCheck2 = cellfun(@(x) ismember(x,{'C1_DI001_Down','C1_DI001_Up'}),tTLNames);
             % Check if they are Up and Down vectors
-            if sum(ttlCheck2) > 0
+            if ~isempty(useIndUD)
                 % Find the first index of UP or DOWN
-                ttlCind = find(ttlCheck2,1,'first');
+%                 ttlCind = find(ttlCheck2,1,'first');
                 % Load in vector
-                tempTTLch = tTLMatobj.(tTLNames{ttlCind});
+                tempTTLch = tTLMatobj.(tTLNames{useIndUD(1)});
                 % If length of vector is greater than one and the file
                 % name length indicates it is an extension then analyze
                 if length(tempTTLch) > 1 
@@ -279,15 +322,6 @@ if doneTag == 0
                 continue
             end
         end
-        
-        
-%         if sum(ttlCheck) ~= 0;
-%             ttlChecklist{ttlCc} = depthFiles{ttlfi};
-%             ttlCc = ttlCc + 1;
-%         else
-%             continue
-%         end
-
     end
     
     ttlChecklist = ttlChecklist(cellfun(@(x) ~isempty(x), ttlChecklist));
@@ -295,7 +329,7 @@ if doneTag == 0
     % Create table to determine if pair or not 
     for tv1 = 1:length(ttlChecklist)
         
-        Add_TTL_Vecs(ttlChecklist{tv1})
+        Add_TTL_Vecs(ttlChecklist{tv1},getTTLitems,useIndUD,neuroOmFlag)
         
     end
 
@@ -708,7 +742,7 @@ end % End of function
 
 %% CleanPackData Function
 
-function [ProcDone] = CleanPackData(recDname, LFPcheck, preProLoc, neuroCheck)
+function [ProcDone] = CleanPackData(recDname, LFPcheck, preProLoc, neuroCheck, eegCheck, eegLabels)
 % CLEANPACKDATA
 % Performs repacking of recording files. Removes unnecessary files created by 
 % AlphaOmega system. Resaves in duplicate directory with fewer files.
@@ -734,17 +768,25 @@ matAll = matfile(recDname);
 matInfo = who(matAll);
 
 % Check for TTL file names
-ttlLogic = cellfun(@(x) ~isempty(strfind(x,'C1_DI00')), matInfo);
-ttlLogInd = find(ttlLogic);
+
+if neuroCheck
+    ttlLogic = cellfun(@(x) ~isempty(strfind(x,'CDIG_IN')), matInfo);
+    ttlLogInd = find(ttlLogic);
+else
+    ttlLogic = cellfun(@(x) ~isempty(strfind(x,'C1_DI00')), matInfo);
+    ttlLogInd = find(ttlLogic);
+end
 
 ttlCheck1 = any(ttlLogic);
-
 getTTLitems = cellfun(@(x) strsplit(x,'_'),matInfo(ttlLogic),'UniformOutput',false);
-getFinalVal = cellfun(@(x) x{3},getTTLitems, 'UniformOutput',false);
+
+if neuroCheck
+    getFinalVal = cellfun(@(x) x{4},getTTLitems, 'UniformOutput',false);
+else
+    getFinalVal = cellfun(@(x) x{3},getTTLitems, 'UniformOutput',false);
+end
 getUpODown = ismember(getFinalVal,{'Up','Down'});
 useIndUD = ttlLogInd(getUpODown);
-
-
 
 if ttlCheck1
     % Check if there are 'C1' files indicative of a TTL signature
@@ -784,16 +826,55 @@ end
           load(recDname)
           
           if neuroCheck
-              
-              % Segmentation Check
+
               listCur = whos;
               curFnames = {listCur.name};
+              
+              % MER
+              ProcDone = 1;
+              
+              mer = struct;
+              
+              mer.sampFreqHz = CSPK_01_KHz*1000;
+              mer.timeStart = CSPK_01_TimeBegin;
+              mer.timeEnd = CSPK_01_TimeEnd;
+              
+              % Find number of Electrodes
+              findSpk = strfind(curFnames,'CSPK');
+              spkBlock = curFnames(cellfun(@(x) ~isempty(x), findSpk));
+              
+              spkNumB = cellfun(@(x) strsplit(x,'_'), spkBlock,'UniformOutput',false);
+              spkNumEx = cellfun(@(x) x{2}, spkNumB,'UniformOutput',false);
+              numSpks = numel(unique(spkNumEx));
+              
+              spkNs = cell(numSpks,1);
+              for si = 1:numSpks
+                  spkNs{si} = strcat('CSPK_0',num2str(si));
+              end
+              
+              fprintf('Saving MER Data for %s \n',recDname);
+              save(recDname,spkNs{:},'mer','ProcDone');
+              
+              % microLFP
+              
+              mLFP = struct;
+              
+              mLFP.sampFreqHz = CLFP_01_KHz*1000;
+              mLFP.timeStart = CLFP_01_TimeBegin;
+              mLFP.timeEnd = CLFP_01_TimeEnd;
+              
+              mlfpNs = cell(numSpks,1);
+              for si = 1:numSpks
+                  mlfpNs{si} = strcat('CLFP_0',num2str(si));
+              end
+              
+              fprintf('Saving mLFP Data for %s \n',recDname);
+              save(recDname,mlfpNs{:},'mLFP','-append');
+              
+              % Segmentation Check
               findSeg = strfind(curFnames,'CSEG');
               segBlock = cellfun(@(x) ~isempty(x),findSeg);
-              if sum(segBlock) == 0
-                  segCheck = 0;
-              else
-                  segCheck = 1;
+              if sum(segBlock) ~= 0
                   segNames = curFnames(segBlock);
                   segNums = unique(cellfun(@(x) str2double(x(7)), segNames));
                   
@@ -821,48 +902,83 @@ end
                   
                   segSaveS = segSaveS(cellfun(@(x) ~isempty(x), segSaveS)); 
                   
-              end
-
-              ProcDone = 1;
-              
-              mer = struct;
-              
-              mer.sampFreqHz = CSPK_01_KHz*1000;
-              mer.timeStart = CSPK_01_TimeBegin;
-              mer.timeEnd = CSPK_01_TimeEnd;
-
-              mLFP = struct;
-              
-              mLFP.sampFreqHz = CLFP_01_KHz*1000;
-              mLFP.timeStart = CLFP_01_TimeBegin;
-              mLFP.timeEnd = CLFP_01_TimeEnd; 
-             
-              lfp = struct;
-              
-              lfp.sampFreqHz = CMacro_LFP_01_KHz*1000;
-              lfp.timeStart = CMacro_LFP_01_TimeBegin;
-              lfp.timeEnd = CMacro_LFP_01_TimeEnd;
-              
-              fprintf('Saving ALL Data for %s \n',recDname);
-              
-              if segCheck
                   spkSeg = struct;
                   
                   spkSeg.sampFreqHz = eval(strcat('CSEG_0',num2str(segNums(1)),'_KHz'));
                   spkSeg.timeStart = eval(strcat('CSEG_0',num2str(segNums(1)),'_TimeBegin'));
                   spkSeg.timeEnd = eval(strcat('CSEG_0',num2str(segNums(1)),'_TimeEnd'));
 
-                  save(recDname,'CSPK_01','CSPK_02','CSPK_03',...
-                      segSaveS{:},...
-                      'CLFP_01','CLFP_02','CLFP_03',...
-                      'CMacro_LFP_01','CMacro_LFP_02','CMacro_LFP_03',...
-                      'mer','spkSeg','mLFP','lfp','ProcDone');
-              else
-                  save(recDname,'CSPK_01','CSPK_02','CSPK_03',...
-                      'CLFP_01','CLFP_02','CLFP_03',...
-                      'CMacro_LFP_01','CMacro_LFP_02','CMacro_LFP_03',...
-                      'mer','mLFP','lfp','ProcDone');
+                  fprintf('Saving SEG Data for %s \n',recDname);
+                  
+                  save(recDname,segSaveS{:},'spkSeg','-append');
+                  
               end
+              
+              % TTL extract
+              if ttlCheck2
+                  
+                  ttlName = strcat(getTTLitems{useIndUD(1)}{1},'_',getTTLitems{useIndUD(1)}{2},'_',...
+                      getTTLitems{useIndUD(1)}{3},'_');
+                  
+                  ttlInfo.ttl_up = eval(strcat(ttlName,'Up'));
+                  ttlInfo.ttl_dn = eval(strcat(ttlName,'Down'));
+                  ttlInfo.ttl_sf = eval(strcat(ttlName,'KHz'));
+                  ttlInfo.ttlTimeBegin = eval(strcat(ttlName,'TimeBegin'));
+                  ttlInfo.ttlTimeEnd = eval(strcat(ttlName,'TimeEnd'));
+                  ttlInfo.ttlTimesUp = TTL_sp_UP;
+                  ttlInfo.ttlTimesDn = TTL_sp_DN;
+                  
+                  fprintf('Saving TTL Data for %s \n',recDname);
+                  
+                  save(recDname,'ttlInfo','-append');
+ 
+              end
+
+              % EEG check % DETERMINE WAY TO GET names in PROGRAMMATICALLY
+              if eegCheck
+                  
+                  eeg = struct;
+                  
+                  eeg.sampFreqHz = CEEG_1___01_KHz*1000;
+                  eeg.timeStart = CEEG_1___01_TimeBegin;
+                  eeg.timeEnd = CEEG_1___01_TimeEnd;
+                  eeg.bitRes = CEEG_1___01_BitResolution;
+                  eeg.labels = eegLabels;
+                  
+                  numEEGs = size(eegLabels,1);
+                  
+                  eegSaveS = cell(numEEGs,1);
+                  for eei = 1:numEEGs
+                      eegSaveS{eei} = strcat('CEEG_1___0',num2str(eei));
+                  end
+                  
+                  fprintf('Saving EEG Data for %s \n',recDname);
+                  
+                  save(recDname, eegSaveS{:},'eeg','-append');
+                  
+              end
+              
+
+              % LFP
+              if LFPcheck
+   
+                  lfp = struct;
+                  
+                  lfp.sampFreqHz = CMacro_LFP_01_KHz*1000;
+                  lfp.timeStart = CMacro_LFP_01_TimeBegin;
+                  lfp.timeEnd = CMacro_LFP_01_TimeEnd;
+                  
+                  lfpNs = cell(numSpks,1);
+                  for si = 1:numSpks
+                      lfpNs{si} = strcat('CMacro_LFP_0',num2str(si));
+                  end
+                  
+                  fprintf('Saving LFP Data for %s \n',recDname);
+                  
+                  save(recDname,lfpNs{:},'lfp','-append');
+                  
+              end
+
           else
               
               mer = struct;
@@ -1040,15 +1156,32 @@ end % END of function
 
 %% SomeOther Function
 
-function [] = Add_TTL_Vecs(ttlInput)
+function [] = Add_TTL_Vecs(ttlInput,getTTLitems,useIndUD,neuroOCheck)
 
 % lVarNames = Get_ListOfVars(ttlInput);
 
 load(ttlInput)
-block = build_block_AO(C1_DI001_Down,...
-    C1_DI001_Up,...
-    C1_DI001_TimeBegin,...
-    C1_DI001_KHz);
+
+if neuroOCheck
+    
+    ttlName = strcat(getTTLitems{useIndUD(1)}{1},'_',getTTLitems{useIndUD(1)}{2},'_',...
+        getTTLitems{useIndUD(1)}{3},'_');
+    
+else
+    
+    ttlName = strcat(getTTLitems{useIndUD(1)}{1},'_',getTTLitems{useIndUD(1)}{2},'_');
+    
+end
+
+ttlUP = eval(strcat(ttlName,'Up'));
+ttlDN = eval(strcat(ttlName,'Down'));
+ttlTB = eval(strcat(ttlName,'KHz'));
+ttlHz = eval(strcat(ttlName,'TimeBegin'));
+
+block = build_block_AO(ttlDN,...
+    ttlUP,...
+    ttlTB,...
+    ttlHz);
 
 
 [toAddTTL_UP, toAddTTL_DN] = Get_ttl_Times_AO(block);
@@ -1061,5 +1194,62 @@ save(ttlInput,'TTL_sp_DN','-append')
 
 % clearvars(lVarNames{:})
             
+
+end
+
+
+
+%% EEG Check Function
+
+function [eegFlag, eegIDs] = checkForEEG(dir2go)
+
+cd(dir2go)
+
+fileOrgCheck = dir('*.mat');
+fileOrgCheck = {fileOrgCheck.name};
+
+fileNum = round(length(fileOrgCheck)/2);
+
+load(fileOrgCheck{fileNum});
+
+listCur = whos;
+curFnames = {listCur.name};
+
+% Find EEG data
+findEEG = strfind(curFnames,'CEEG');
+tempCheck = cellfun(@(x) ~isempty(x), findEEG);
+
+if ~any(tempCheck)
+    eegFlag = 0;
+else
+    eegFlag = 1;
+end
+
+if eegFlag
+    
+    eegBlock = curFnames(cellfun(@(x) ~isempty(x), findEEG));
+    
+    eegNumB = cellfun(@(x) strsplit(x,'_'), eegBlock,'UniformOutput',false);
+    eegNumEx = cellfun(@(x) x{3}, eegNumB,'UniformOutput',false);
+    numEEGs = numel(unique(eegNumEx));
+    
+    eegNs = cell(numEEGs,1);
+    for si = 1:numEEGs
+        eegNs{si} = strcat('CEEG_1___0',num2str(si));
+    end
+    defs = transpose(cellstr(repmat('Cz',numEEGs,1)));
+    prompts = eegNs;
+
+    eegTab = inputdlg(prompts,'EEG',1,defs);
+    
+    eegIDs = cell2table([eegNs , eegTab],'VariableNames',{'EEG_Num','EEG_ID'});
+
+else
+    
+    eegIDs = nan;
+    
+end
+
+
 
 end

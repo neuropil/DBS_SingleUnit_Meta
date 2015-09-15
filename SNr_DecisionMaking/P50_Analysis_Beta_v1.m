@@ -22,6 +22,7 @@ baseLine = nan(200,1);
 condition = nan(200,1);
 testing = nan(200,1);
 cCount = 1;
+cName = {};
 for ii = 1:length(p50list)
 
     tempDay = sumData{ii,1};
@@ -38,7 +39,9 @@ for ii = 1:length(p50list)
         t1 = mean(tempDay.(cNames{iii}).peth(11:15,:));
         testing(cCount) = mean(t1);
         
+        cName{cCount} = p50list{ii};
         cCount = cCount + 1;
+        
     end
 end
 
@@ -48,8 +51,10 @@ testing = testing(~isnan(testing));
 
 %%
 
-p50Ratio = (testing - baseLine) ./ (condition - baseLine);
-numP50 = sum(p50Ratio > 0);
+p50Ratio = abs(testing - baseLine) ./ abs(condition - baseLine);
+numP50 = sum(p50Ratio > 0 & p50Ratio < 0.5);
+p50ratInd = p50Ratio > 0 & p50Ratio < 0.5;
+cNameUse = cName(p50ratInd);
 
 histogram(p50Ratio,15);
 xlabel('P50 Ratio');
