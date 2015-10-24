@@ -50,13 +50,26 @@ condition = condition(~isnan(condition));
 testing = testing(~isnan(testing));
 
 %%
+testingBase = abs(testing - baseLine);conditionBase = abs(condition - baseLine);
+testZeros = testingBase == 0;
 
-p50Ratio = abs(testing - baseLine) ./ abs(condition - baseLine);
-numP50 = sum(p50Ratio > 0 & p50Ratio < 0.5);
-p50ratInd = p50Ratio > 0 & p50Ratio < 0.5;
+testingBase = testingBase(~testZeros);
+conditionBase = conditionBase(~testZeros);
+
+condZeros = conditionBase == 0;
+testingBase = testingBase(~condZeros);
+conditionBase = conditionBase(~condZeros);
+
+audGatRatio = testingBase ./ conditionBase;
+
+numP50 = sum(audGatRatio < 0.5);
+p50ratInd = audGatRatio < 0.5;
 cNameUse = cName(p50ratInd);
 
-histogram(p50Ratio,15);
-xlabel('P50 Ratio');
+histogram(audGatRatio,100);
+xlabel('Auditory Gating Ratio');
 ylabel('Neuron Count');
-title([num2str(numP50) , ' \ ', num2str(length(p50Ratio))]);
+title([num2str(numP50) , ' \ ', num2str(length(audGatRatio))]);
+xlim([0 4])
+line([0.5 0.5] , [0 10], 'Color','k','LineStyle','--')
+

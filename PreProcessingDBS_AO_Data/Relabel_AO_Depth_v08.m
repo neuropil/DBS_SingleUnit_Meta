@@ -1,5 +1,5 @@
-function Relabel_AO_Depth_v07
-% RELABEL_AO_DEPTH VERSION 0.07
+function Relabel_AO_Depth_v08
+% RELABEL_AO_DEPTH VERSION 0.08
 % This function will cycle through Recording days, rename and repack files
 % based on pertient data. 
 % Defaults: 
@@ -10,11 +10,10 @@ function Relabel_AO_Depth_v07
 % #########################################################################
 % #########################################################################
 % REVISION HISTORY
-% Recent Update: 7/13/2015
-% Recent Update: 8/4/2015 Version 06 - Updated to evaluate NeuroOmega files
-% Recent Update: 9/15/2015 Version 07 - Updated to evaluate EEG data
-% NEED TO UPDATE NEW CHANGES AHHHHHHHHHHHHHHHHHHH REMOVE Anatomy from
-% everything but EEG
+% Recent Update: 07/13/2015
+% Recent Update: 08/04/2015 Version 06 - Updated to evaluate NeuroOmega files
+% Recent Update: 09/15/2015 Version 07 - Updated to evaluate EEG data
+% Recent Update: 10/20/2015 Version 08 - REMOVE Anatomy from and revise EEG
 % #########################################################################
 % #########################################################################
 
@@ -78,7 +77,25 @@ for fdir = 1:length(foldernamesFinal)
                     for rnI = 1:length(reNameMat2)
                         
                         [~,oldName,ext] = fileparts(reNameMat2{rnI});
-                        newName = strcat(oldName(5:length(oldName) - 5),'.mat');
+                        
+                        if length(oldName) == 14
+                            tempNumNa = oldName(5:9);
+                            numNaParts = strsplit(tempNumNa,'.');
+                            newName = strcat('0',[numNaParts{:}],'.mat');
+                        elseif length(oldName) == 15
+                            
+                            if strcmp(oldName(5),'-')
+                                tempNumNa = oldName(6:10);
+                                numNaParts = strsplit(tempNumNa,'.');
+                                newName = strcat('-0',[numNaParts{:}],'.mat');
+                            else
+                                tempNumNa = oldName(5:10);
+                                numNaParts = strsplit(tempNumNa,'.');
+                                newName = strcat([numNaParts{:}],'.mat');
+                            end
+                            
+                        end
+                        
                         movefile([oldName,ext],newName)
                         
                     end
@@ -92,7 +109,7 @@ for fdir = 1:length(foldernamesFinal)
             if isnan(lfpBool) && isnan(toSaveFiles)
                 continue
             else
-                [eegFlag, eegIDs] = checkForEEG(dateLoc);
+                [eegFlag, eegIDs] = checkForEEG(dateLoc, dai, diractual);
                 % If not complete, cycle through each recording in the
                 % Session
                 cd(preProLoc);
@@ -114,8 +131,6 @@ for fdir = 1:length(foldernamesFinal)
             
         end % End of Date loop for Sets
 
-        
-        
     else % it does not have sets
         
         dai = nan;
@@ -173,7 +188,7 @@ for fdir = 1:length(foldernamesFinal)
             continue
         else
             
-            [eegFlag, eegIDs] = checkForEEG(dateLoc);
+            [eegFlag, eegIDs] = checkForEEG(dateLoc, dai, diractual);
             % If not complete, cycle through each recording in the
             % Session
             cd(preProLoc);
@@ -221,8 +236,6 @@ if ~isempty(fileOrgCheck) && ismember('NOAO.txt',fileOrgCheck)
 else
     neuroOmFlag = 0;
 end
-
-
 
 oldLoc = pwd;
 newLoc = strcat('Y:\PreProcessEphysData\',actFileDir);
@@ -600,6 +613,8 @@ if doneTag == 0
                                 fixedName = strcat(keepParts{1},'_',keepParts{2});
                             elseif numel(keepParts) == 3
                                 fixedName = strcat(keepParts{1},'_',keepParts{2},'_',keepParts{3});
+                            elseif numel(keepParts) == 4
+                                fixedName = strcat(keepParts{1},'_',keepParts{2},'_',keepParts{3},'_',keepParts{4});
                             end
                             
                             oSVars.(fixedName) = eval(tempANames{ati2});
@@ -616,11 +631,7 @@ if doneTag == 0
             end
         end
     end
-    
-    
-    
-    
-    
+
     for fii = 1:length(depthFiles)
         curFname = depthFiles{fii};
         
@@ -638,16 +649,16 @@ if doneTag == 0
             if ~strcmp(curFname(1),'n'); % CHANGED *********************
                 abDSName{atCount,1} = 'AbvTrgt';
 
-                if neuroOmFlag
-                    abParts = strsplit(depthFiles{fii},'.');
-                    if length(abParts{1}) == 1
-                        abParts{1} = ['0',abParts{1}];
-                    end
-                    tempDepth = [abParts{1},abParts{2}];
-                else
+%                 if neuroOmFlag
+%                     abParts = strsplit(depthFiles{fii},'.');
+%                     if length(abParts{1}) == 1
+%                         abParts{1} = ['0',abParts{1}];
+%                     end
+%                     tempDepth = [abParts{1},abParts{2}];
+%                 else
                     abParts = strsplit(depthFiles{fii},'.');
                     tempDepth = abParts{1};
-                end
+%                 end
                 
                 if length(tempDepth) > 6
                     stRempDepth = tempDepth(1:5);
@@ -788,8 +799,7 @@ if doneTag == 0
         copyfile(alltempFname,allnewFname);
         
     end
- 
-    
+
 else
     
     allFilesL = dir('*.txt');
@@ -856,10 +866,10 @@ matInfo = who(matAll);
 
 if neuroCheck
     ttlLogic = cellfun(@(x) ~isempty(strfind(x,'CDIG_IN')), matInfo);
-    ttlLogInd = find(ttlLogic);
+%     ttlLogInd = find(ttlLogic);
 else
     ttlLogic = cellfun(@(x) ~isempty(strfind(x,'C1_DI00')), matInfo);
-    ttlLogInd = find(ttlLogic);
+%     ttlLogInd = find(ttlLogic);
 end
 
 ttlCheck1 = any(ttlLogic);
@@ -870,8 +880,13 @@ if neuroCheck
 else
     getFinalVal = cellfun(@(x) x{3},getTTLitems, 'UniformOutput',false);
 end
+
 getUpODown = ismember(getFinalVal,{'Up','Down'});
-useIndUD = ttlLogInd(getUpODown);
+useIndUD = find(getUpODown);
+
+% if ~isempty(useIndUD)
+%     useIND = getUpODown;
+% end
 
 if ttlCheck1
     % Check if there are 'C1' files indicative of a TTL signature
@@ -894,11 +909,6 @@ if ttlCheck1
 else
     ttlCheck2 = 0;
 end
-
-% load(recDname)
-
-% dNchkL = whos;
-% dNchkN = {dNchkL.name};
 
 % BASELINE SAVE MER
    % CHECK FOR TTL 
@@ -1024,17 +1034,19 @@ end
                   
                   eeg = struct;
                   
-                  eeg.sampFreqHz = CEEG_1___01_KHz*1000;
-                  eeg.timeStart = CEEG_1___01_TimeBegin;
-                  eeg.timeEnd = CEEG_1___01_TimeEnd;
-                  eeg.bitRes = CEEG_1___01_BitResolution;
+                  eegTempName = strcat('CEEG_1___06___',eegLabels.EEG_ID{6},'_');
+                  
+                  eeg.sampFreqHz = eval(strcat(eegTempName,'KHz'))*1000;
+                  eeg.timeStart = eval(strcat(eegTempName,'TimeBegin'));
+                  eeg.timeEnd = eval(strcat(eegTempName,'TimeEnd'));
+                  eeg.bitRes = eval(strcat(eegTempName,'BitResolution'));
                   eeg.labels = eegLabels;
                   
                   numEEGs = size(eegLabels,1);
                   
                   eegSaveS = cell(numEEGs,1);
                   for eei = 1:numEEGs
-                      eegSaveS{eei} = strcat('CEEG_1___0',num2str(eei));
+                      eegSaveS{eei} = strcat('CEEG_1___0',num2str(eei),'___',eegLabels.EEG_ID{eei});
                   end
                   
                   fprintf('Saving EEG Data for %s \n',recDname);
@@ -1166,7 +1178,6 @@ if exist(preProLoc,'dir')
     cd(tempdateLoc)
 end
 
-
 if strcmp(regexp(testFileA,'Trgt','match'),'Trgt')
     doneTag = 1;
     [newLoc, neuroOmFlag] = rename_file(depthFiles, actFileDir, doneTag);
@@ -1174,7 +1185,6 @@ else
     doneTag = 0;
     [newLoc, neuroOmFlag] = rename_file(depthFiles, actFileDir, doneTag);
 end % End of determine whether already done
-
 
 cd(newLoc)
 
@@ -1286,9 +1296,16 @@ end
 
 %% EEG Check Function
 
-function [eegFlag, eegIDs] = checkForEEG(dir2go)
+function [eegFlag, eegIDs] = checkForEEG(dir2go, dai, diractual)
 
-cd(dir2go)
+
+if isnan(dai)
+    tempdateLoc = dir2go;
+else
+    tempdateLoc = strcat(dir2go,'\',diractual{dai});
+end
+
+cd(tempdateLoc)
 
 fileOrgCheck = dir('*.mat');
 fileOrgCheck = {fileOrgCheck.name};
@@ -1328,8 +1345,30 @@ if eegFlag
     % Save Anatomy
     if eegNumC > 4
         
-        eegTab = cellfun(@(x) x{4}, eegNumB,'UniformOutput',false);
+%         eegNameEx = cellfun(@(x) x{4}, eegNumB,'UniformOutput',false);
+        eegTab = cell(numEEGs,1);
         
+        % GET INDICIES FROM BELOW
+        eegNEx = cellfun(@(x) str2double(x), eegNumEx);
+        uniEEGnums = unique(eegNEx);
+        for uni = 1:max(uniEEGnums)%fi = 1:length(eegNumB)
+           
+            numInd = find(eegNEx == uniEEGnums(uni), 1, 'first');
+            
+            tempCell = eegNumB{numInd};
+            irrelLabs = {'KHz','TimeBegin','Gain','BitResolution','TimeEnd'};
+            if numel(tempCell) > 4 && ~ismember(tempCell{5},irrelLabs)
+                if numel(tempCell) == 5;
+                    eegTab{uni,1} = strcat(tempCell{4},'_',tempCell{5});
+                elseif numel(tempCell) == 6;
+                    eegTab{uni,1} = strcat(tempCell{4},'_',tempCell{5},'_',tempCell{6}); 
+                end
+            else
+                eegTab{uni,1} = tempCell{4};
+            end
+            
+        end
+
         eegIDs = cell2table([eegNs , eegTab],'VariableNames',{'EEG_Num','EEG_ID'});
         
     else
