@@ -1,4 +1,4 @@
-function Relabel_AO_Depth_v08
+function Relabel_AO_Depth_v09
 % RELABEL_AO_DEPTH VERSION 0.08
 % This function will cycle through Recording days, rename and repack files
 % based on pertient data. 
@@ -21,7 +21,7 @@ function Relabel_AO_Depth_v08
 % Check for access to DBS Data Drive on local computer
 if exist('Y:\','dir')
     AOLoc = 'Y:\AlphaOmegaMatlabData';
-%     POLoc = 'Y:\PreProcessEphysData';
+    %     POLoc = 'Y:\PreProcessEphysData';
     cd(AOLoc)
     dirfolders = dir;
     foldernamesTemp = {dirfolders.name};
@@ -49,189 +49,28 @@ for fdir = 1:length(foldernamesFinal)
     testfile = diractual{1};
     dirDateFiles = dir('*.mat');
     
-    % If there are Sets, then cycle through each Set   
+    % If there are Sets, then cycle through each Set
     if strcmp(testfile,'Set1') && isempty(dirDateFiles);
         
         % Loop through each Set
         for dai = 1:length(diractual)
-
-            neuroChc = strcat(dateLoc,'\Set',num2str(dai));
-            cd(neuroChc)
-            % Check if data originated from MICROGUIDE or NEUROOMEGA
-            fileOrgCheck = dir('*.txt');
-            fileOrgCheck = {fileOrgCheck.name};
-            if ~isempty(fileOrgCheck) && ismember('NOAO.txt',fileOrgCheck)
-                neuroOmFlag = 1;
-            else
-                neuroOmFlag = 0;
-            end
-
-            if neuroOmFlag
-                
-                reNameMat1 = dir('*.mat');
-                reNameMat2 = {reNameMat1.name};
-                
-                checkNOrename = reNameMat2{1};
-                
-                if ismember(checkNOrename(1),{'L','l','R','r'})
-                    
-                    reNameExtAdd = reNameDupsCheck(reNameMat2);
-                    
-                    for rnI = 1:length(reNameExtAdd)
-                        
-                        [~,oldName,ext] = fileparts(reNameExtAdd{rnI});
-                        
-                        if length(oldName) == 14
-                            tempNumNa = oldName(5:9);
-                            numNaParts = strsplit(tempNumNa,'.');
-                            newName = strcat('0',[numNaParts{:}],'.mat');
-                        elseif length(oldName) == 15
-                            
-                            if strcmp(oldName(5),'-')
-                                tempNumNa = oldName(6:10);
-                                numNaParts = strsplit(tempNumNa,'.');
-                                newName = strcat('-0',[numNaParts{:}],'.mat');
-                            else
-                                tempNumNa = oldName(5:10);
-                                numNaParts = strsplit(tempNumNa,'.');
-                                newName = strcat([numNaParts{:}],'.mat');
-                            end
-                            
-                        elseif length(oldName) > 16
-                            
-                            if strcmp(oldName(5),'-')
-                                tempNumNa = oldName(6:10);
-                                numNaParts = strsplit(tempNumNa,'.');
-                                newName = strcat('-0',[numNaParts{:}],'000',oldName(length(oldName)),'.mat');
-                            else
-                                tempOD = strsplit(lower(oldName),{'d','f'});
-                                tempDL = tempOD{2};
-                                if length(tempDL) == 5;
-                                    tempNumNa = oldName(5:9);
-                                    numNaParts = strsplit(tempNumNa,'.');
-                                    newName = strcat('0',[numNaParts{:}],'000',oldName(length(oldName)),'.mat');
-                                else
-                                    tempNumNa = oldName(5:10);
-                                    numNaParts = strsplit(tempNumNa,'.');
-                                    newName = strcat([numNaParts{:}],'000',oldName(length(oldName)),'.mat');
-                                    
-                                end
-                            end
-                            
-                            oldName = oldName(1:length(oldName)-4);
-                            
-                        end
-                        
-                        movefile([oldName,ext],newName)
-                        
-                    end
-                end
-            end
+            
+            [dateLoc, ~, diractual, neuroOmFlag] = reNameMove(dateLoc, dai, diractual);
             
             cd(dateLoc)
             % Detemine if files need to be renamed and rename them
-            [preProLoc, lfpBool, toSaveFiles] = RenameCheckLFP(dateLoc, dai, diractual);
-            % Skip recording day if already complete
-            if isnan(lfpBool) && isnan(toSaveFiles)
-                continue
-            else
-                [eegFlag, eegIDs] = checkForEEG(dateLoc, dai, diractual);
-                % If not complete, cycle through each recording in the
-                % Session
-                cd(preProLoc);
-                allFilesL = dir('*.txt');
-                allFilesLn = {allFilesL.name};
-                
-                if ~isempty(allFilesLn) && ismember('ProcessDoneFinal.txt',allFilesLn)
-                    continue
-                else
-                    for tsfI = 1:length(toSaveFiles)
-                        
-                       [~] = CleanPackData(toSaveFiles{tsfI}, lfpBool, preProLoc, neuroOmFlag, eegFlag, eegIDs);
-                        
-                    end
-                    save('ProcessDoneFinal.txt')
-                end
-                
-            end
+            [~, ~, ~] = checkAndpack(dateLoc, dai, diractual, neuroOmFlag);
             
         end % End of Date loop for Sets
-
+        
     else % it does not have sets
         
         dai = nan;
         
-        % Check if data originated from MICROGUIDE or NEUROOMEGA
-        fileOrgCheck = dir('*.txt');
-        fileOrgCheck = {fileOrgCheck.name};
-        if ~isempty(fileOrgCheck) && ismember('NOAO.txt',fileOrgCheck)
-            neuroOmFlag = 1;
-        else
-            neuroOmFlag = 0;
-        end
-   
-        if neuroOmFlag
-            
-            reNameMat1 = dir('*.mat');
-            reNameMat2 = {reNameMat1.name};
-            
-            checkNOrename = reNameMat2{1};
-            
-            if ismember(checkNOrename(1),{'L','l','R','r'})
-                
-                for rnI = 1:length(reNameMat2)
-                    
-                    [~,oldName,ext] = fileparts(reNameMat2{rnI});
-                    
-                    if length(oldName) == 14
-                        tempNumNa = oldName(5:9);
-                        numNaParts = strsplit(tempNumNa,'.');
-                        newName = strcat('0',[numNaParts{:}],'.mat');
-                    elseif length(oldName) == 15
-                        
-                        if strcmp(oldName(5),'-')
-                            tempNumNa = oldName(6:10);
-                            numNaParts = strsplit(tempNumNa,'.');
-                            newName = strcat('-0',[numNaParts{:}],'.mat');
-                        else
-                            tempNumNa = oldName(5:10);
-                            numNaParts = strsplit(tempNumNa,'.');
-                            newName = strcat([numNaParts{:}],'.mat');
-                        end
-                        
-                    end
-
-                    movefile([oldName,ext],newName)
-                    
-                end
-            end
-        end
+        [dateLoc, dai, diractual, neuroOmFlag] = reNameMove(dateLoc, dai, diractual);
         
         % Detemine if files need to be renamed and rename them
-        [preProLoc, lfpBool, toSaveFiles] = RenameCheckLFP(dateLoc, dai, diractual);
-        
-        if isnan(lfpBool) && isnan(toSaveFiles)
-            continue
-        else
-            
-            [eegFlag, eegIDs] = checkForEEG(dateLoc, dai, diractual);
-            % If not complete, cycle through each recording in the
-            % Session
-            cd(preProLoc);
-            allFilesL = dir('*.txt');
-            allFilesLn = {allFilesL.name};
-            if ~isempty(allFilesLn) && ismember('ProcessDoneFinal.txt',allFilesLn)
-                continue
-            else
-                
-                for tsfI = 1:length(toSaveFiles)
-                    
-                     [~] = CleanPackData(toSaveFiles{tsfI}, lfpBool, preProLoc, neuroOmFlag, eegFlag, eegIDs);
-                    
-                end
-                save('ProcessDoneFinal.txt')
-            end
-        end
+        [~, ~, ~] = checkAndpack(dateLoc, dai, diractual, neuroOmFlag);
         
     end % End of test for Sets
     
@@ -421,9 +260,25 @@ if doneTag == 0
         end
         
         % Get varnames of Ext file
-        extMatobj = matfile(extF);
-        extMatinfo = whos(extMatobj);
-        extMatNames = {extMatinfo.name};
+        
+        if ~neuroOmFlag
+            
+            extMatobj = matfile(extF);
+            extMatinfo = whos(extMatobj);
+            extMatNames = {extMatinfo.name};
+            
+        else
+            
+            keywords = {'CDIG','TTL','CSPK','CSEG','CEEG','CLFP','CMacro_LFP'};
+            extMatobj = matfile(depthFiles{ttlfi});
+            extMatinfo = whos(extMatobj);
+            extMatNames = {extMatinfo.name};
+            nTmpNamesST1 = cellfun(@(x) strsplit(x,'_'), extMatNames, 'UniformOutput', false);
+            nTmpNamesST2 = cellfun(@(x) x{1}, nTmpNamesST1, 'UniformOutput', false);
+            wLeft = ismember(nTmpNamesST2,keywords);
+            
+            
+        end
         
         fprintf('Loading extension file %s \n',extF);
         load(extF);
@@ -505,23 +360,32 @@ if doneTag == 0
         allExtNames = cellfun(@(x) strcat(x,'_ext'), allNames, 'UniformOutput', false);
         allOrgNames = cellfun(@(x) strcat(x,'_org'), allNames, 'UniformOutput', false);
         
-        for iiii = 1:length(allNames);
-            combFstruct.(allNames{iiii}) = [];
-            combCase = allNid(iiii);
-            switch combCase
-                case 1 % Field is present in both
-                    combFstruct.(allExtNames{iiii}) = extMatobj.(allNames{iiii});
-                    combFstruct.(allOrgNames{iiii}) = orgMatobj.(allNames{iiii});
-                case 2 % Field is only present in original
-                    combFstruct.(allExtNames{iiii}) = [];
-                    combFstruct.(allOrgNames{iiii}) = orgMatobj.(allNames{iiii});
-                case 3 % Field is only present in extension
-                    combFstruct.(allExtNames{iiii}) = extMatobj.(allNames{iiii});
-                    combFstruct.(allOrgNames{iiii}) = [];
+%         if ~neuroOmFlag
+            for iiii = 1:length(allNames);
+                combFstruct.(allNames{iiii}) = [];
+                combCase = allNid(iiii);
+                switch combCase
+                    case 1 % Field is present in both
+                        combFstruct.(allExtNames{iiii}) = extMatobj.(allNames{iiii});
+                        combFstruct.(allOrgNames{iiii}) = orgMatobj.(allNames{iiii});
+                    case 2 % Field is only present in original
+                        combFstruct.(allExtNames{iiii}) = [];
+                        combFstruct.(allOrgNames{iiii}) = orgMatobj.(allNames{iiii});
+                    case 3 % Field is only present in extension
+                        combFstruct.(allExtNames{iiii}) = extMatobj.(allNames{iiii});
+                        combFstruct.(allOrgNames{iiii}) = [];
+                end
+                %
+                fprintf('Field %d out of %d DONE! \n',iiii,length(allNames))
             end
-            %
-            fprintf('Field %d out of %d DONE! \n',iiii,length(allNames))
-        end
+            
+%         else
+%             for iiii = 1:length(allNames);
+%                 combFstruct.(allNames{iiii}) = [];
+%                 combFstruct.(allOrgNames{iiii}) = orgMatobj.(allNames{iiii});
+%                 fprintf('Field %d out of %d DONE! \n',iiii,length(allNames))
+%             end
+%         end
 
         % Determine if files should be stitched or not
         if neuroOmFlag
@@ -1486,9 +1350,9 @@ end
 end
 
 
-function [dateLoc, dai, diractual] = reNameMove(dateLoc, dai, diractual)
+function [dateLoc, dai, diractual, neuroOmFlag] = reNameMove(dateLoc, dai, diractual)
 
-if isnan(dai)
+if ~isnan(dai)
     neuroChc = strcat(dateLoc,'\Set',num2str(dai));
     cd(neuroChc)
 end
@@ -1569,7 +1433,7 @@ end % End of function
 
 
 
-function [preProLoc, lfpBool, toSaveFiles] = checkAndpack(dateLoc, dai, diractual)
+function [preProLoc, lfpBool, toSaveFiles] = checkAndpack(dateLoc, dai, diractual, neuroOmFlag)
 
 [preProLoc, lfpBool, toSaveFiles] = RenameCheckLFP(dateLoc, dai, diractual);
 % Skip recording day if already complete

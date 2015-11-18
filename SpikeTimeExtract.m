@@ -16,9 +16,11 @@ detect = handles.params.detection;
 handles.sampleRate = handles.params.sr;
 timePreWindow = handles.params.w_pre;
 timePostWindow = handles.params.w_post;
+
 % peak_ref = handles.params.ref;
 
 isiBuffer = round(handles.sampleRate/1000) + round(round(handles.sampleRate/1000)/2);
+neg_buf = abs(handles.params.w_pre - floor(isiBuffer/2));
 
 switch detect
     case 'pos'
@@ -38,7 +40,7 @@ switch detect
         for sptI = 1:length(thrXIndex_shft)
             if thrXIndex_shft(sptI) >= tempXindex + round(isiBuffer/2) % does current index occur within the range between previous index and one half wave window
                 % Get max index relative to threshold crossing
-                [~, relXindex] = max((filtSpkData(thrXIndex_shft(sptI):thrXIndex_shft(sptI) + floor(isiBuffer/2) - 1)));  %introduces alignment
+                [~, relXindex] = max((filtSpkData(thrXIndex_shft(sptI) - neg_buf:thrXIndex_shft(sptI) + floor(isiBuffer/2) - 1)));  %introduces alignment
                 spikeNumber = spikeNumber + 1;
                 thrXIndex(spikeNumber) = relXindex + thrXIndex_shft(sptI) - 1; % subtract 1 to account for the shift
                 tempXindex = thrXIndex(spikeNumber);

@@ -10,7 +10,7 @@ function [FSDE_ds] = FSDE_Method(tempWaves)
 
 FSDEvals = zeros(length(tempWaves),3);
 for wavi = 1:length(FSDEvals)
-    tempWave = tempWaves(:,wavi);
+    tempWave = tempWaves(wavi,:);
     tempFD = firstDer(tempWave);
     tempSD = secondDer(tempFD);
     [~,tempFDMinLoc] = min(tempFD);
