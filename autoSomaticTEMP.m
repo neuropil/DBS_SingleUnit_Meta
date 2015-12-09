@@ -56,47 +56,50 @@ features.FSDE_Values =...
 % component of waveform (Felsen and Thompson method)
 [features.WaveFitParams] = WaveFormFit_AS(tempWaves, size(tempWaves,2));
 
+%%
+plot(jat_Struct.spkWaveforms(features.WaveFitParams.noise,:)','k')
+hold on
+plot(jat_Struct.spkWaveforms(~features.WaveFitParams.noise,:)','r')
+
 % normalize features
 
-% HERE GET DATA from 
+X = [features.Peak , features.Valley ,...
+     features.Energy , features.WavePC1 ,...
+     features.FSDE_Values.FDmin , features.FSDE_Values.SDmax ,...
+     features.FSDE_Values.SDmin , features.WaveFitParams.gauss_fit_neg_width ,...
+     features.WaveFitParams.gauss_fit_pos_width];
 
 
-% PCA or some such dimension reduce
-
-
-
-
-% Cluster 3 components that explain most variance
-
-
+%% HOW TO DETERMINe THE best number of clusters
 
 
 
 
+X1 = X(:,1:3);
+eva = evalclusters(X1,'kmeans','DaviesBouldin','KList',1:7);
+numClusts =  eva.OptimalK;
+
+%%
 
 
+% c = clusterdata(X1,'mahalanobis','linkage','ward','maxclust',3);
+c = clusterdata(X1,'distance','chebychev','linkage','ward','maxclust',numClusts);
+% Plot the data with each cluster shown in a different color.
+figure
+scatter3(X1(:,1),X1(:,2),X1(:,3),10,c)
+
+%% 
+
+filtWave = jat_Struct.spkWaveforms(~features.WaveFitParams.noise,:);
+cfilt = c(~features.WaveFitParams.noise);
+%%
+figure;
+subplot(1,2,1);
+plot(filtWave(cfilt==1,:)','r')
+ylim([-6000 6000]);
+subplot(1,2,2);
+plot(filtWave(cfilt==2,:)','g')
+ylim([-6000 6000]);
 
 
-
-
-
-
-
-
-
-
-
-% PCA - dimension reduction toolbox
-
-
-% Cluster - Kmeans
-
-
-% Start high - reduce n based on cluster quality metric - evalclusters
-
-
-% Distance metric = eval clusters
-
-
-% GUI to choose spike files
 

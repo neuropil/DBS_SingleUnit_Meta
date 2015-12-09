@@ -34,7 +34,7 @@ for ti = 1:size(tempWaves,1)
     
     [~, maxpoint] = max(uselead_base);
     
-    if maxpoint > round(0.95*timeLen)
+    if maxpoint > round(0.82*timeLen)
         noiseVec(ti) = 1;
         
         
@@ -103,8 +103,8 @@ for ti = 1:size(tempWaves,1)
     
 %     WaveFitParams.jtkoyama_neg_width(ti) = negpeak_half_width;
 %     WaveFitParams.jtkoyama_pos_width(ti) = pospeak_width;
-    WaveFitParams.amp(ti) = spkamp;
-    WaveFitParams.baseline(ti) = basesub;
+    WaveFitParams.amp(ti,1) = spkamp;
+    WaveFitParams.baseline(ti,1) = basesub;
     
     % Gidon Waveform Analysis %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
