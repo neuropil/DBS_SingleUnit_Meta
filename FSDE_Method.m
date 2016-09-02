@@ -8,7 +8,7 @@ function [FSDE_ds] = FSDE_Method(tempWaves)
 
 % Get Index where FDmin,SDmin,SDmax occur
 
-FSDEvals = zeros(length(tempWaves),3);
+FSDEvals = zeros(size(tempWaves,1),3);
 for wavi = 1:length(FSDEvals)
     tempWave = tempWaves(wavi,:);
     tempFD = firstDer(tempWave);

@@ -3,7 +3,7 @@ function [outPut] = P50_SpikeAnalysis_v01(cell_Number)
 
 %%
 
-dbaseLoc = 'Y:\HumanNeuronDB';
+dbaseLoc = 'E:\Dropbox\JohnAThompson_Matlab\p50_neuronFiles\p50VimStructs';
 cd(dbaseLoc)
 
 %% To do
@@ -23,7 +23,8 @@ mer = humanStruct.merInfo;
 %% TTL times from AO
 
 % TTL time stamps
-ttlTimes = ttlInfo.ttlTimesUp;
+ttlTimes = humanStruct.ttlInfo.ttl_up;
+ttlTimes = (ttlTimes - min(ttlTimes))/mer.sampFreqHz;
 
 ttlTimes2use = ttlTimes;
 
@@ -37,19 +38,25 @@ outPut = struct;
 
 
 % Cluster ID vector
-clusterS = spkEvs(:,2); 
+clusterS = spkEvs.clustIDS; 
 % Time stamps 
-timestamps = spkEvs(:,3);
+timestamps = humanStruct.spikeEvents.waveforms.allWavesInfo.alllocs;
 % Cluster indices
-numClusts = max(clusterS);
+uniqueIDS = unique(clusterS);
+numClusts = sum(unique(clusterS) ~= 0);
+clusterID = uniqueIDS(unique(clusterS) ~= 0);
 allClusts = struct;
 for clI = 1:numClusts
-   tempClusInd = clusterS == clI;
+   tempClusInd = clusterS == clusterID(clI);
    allClusts.(strcat('clust',num2str(clI))).index = tempClusInd;
+   
+   % Zero clusTimes
    tempClusTimes = timestamps(tempClusInd);
+   tempClusTimes = (tempClusTimes - min(tempClusTimes))/mer.sampFreqHz;
+   
    allClusts.(strcat('clust',num2str(clI))).clustTimes = tempClusTimes;
    % Set Spike Timestamps with respect to AO start time
-   allClusts.(strcat('clust',num2str(clI))).spkTimes = mer.timeStart + tempClusTimes;
+   allClusts.(strcat('clust',num2str(clI))).spkTimes = ((mer.timeStart)/mer.sampFreqHz) + tempClusTimes;
 end
 
 % Number of trials 
@@ -61,7 +68,7 @@ numtrials = numel(ttlTimes2use);
 firstClick = 0.1;
 secondClick = firstClick + humanStruct.behInfo.clicksec;
 
-trialDur = secondClick + 0.5; % in secs
+trialDur = secondClick + 2.8; % in secs
 
 %%
 
@@ -123,7 +130,7 @@ for clustI3 = 1:numClusts
         topS = repmat(topY,1,length(tsPikes));
         
         % Spikes
-        line([tsPikes' ; tsPikes'], [botS ; topS],'LineStyle','-','Color','k','LineWidth',0.5)
+        line([tsPikes ; tsPikes], [botS ; topS],'LineStyle','-','Color','k','LineWidth',0.5)
         
         % Trial Events
         
@@ -138,8 +145,8 @@ for clustI3 = 1:numClusts
         
     end
     
-    meanFix = 0.1;
-    meanMot = 0.2;
+    meanFix = firstClick;
+    meanMot = secondClick;
 
     
     ylim([0 topY - 0.5]);
@@ -152,7 +159,7 @@ for clustI3 = 1:numClusts
     [xTickVals,xTickInds] = sort(xtickIDS);
     set(gca,'XTick',xTickVals)
     
-    meanNames = {'FirstCl','SecondCl'};
+    meanNames = {'1st Click','2nd Click'};
     xtickStr = cell(1,length(xtickIDS));
     
     xtickStr(ismember(xTickInds,[1 2])) = meanNames;
@@ -164,7 +171,7 @@ for clustI3 = 1:numClusts
     set(gca,'YTick',[1 round(botY/2) botY])
     set(gca,'XTickLabelRotation', -45) 
 
-    timeBin = 0.02;
+    timeBin = 0.1;
     edges = 0:timeBin:trialDur;
     peth = nan(length(edges)-1,numtrials);
     xAxisPETH = linspace(0,trialDur,length(edges)-1);

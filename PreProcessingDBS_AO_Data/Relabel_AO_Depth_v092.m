@@ -1,4 +1,4 @@
-function Relabel_AO_Depth_v091
+function Relabel_AO_Depth_v092
 % RELABEL_AO_DEPTH VERSION 0.091
 % This function will cycle through Recording days, rename and repack files
 % based on pertient data. 
@@ -843,13 +843,9 @@ useIndUD = find(getUpODown);
 
 % Check for mis-fired TTL just one TTL : added 8/30/2016
 if ttlCheck0
-    load(recDname)
-    if isempty(eval(strjoin(getTTLitems{1,1},'_'))) ||...
-            numel(eval(strjoin(getTTLitems{1,1},'_'))) == 1;
-        ttlCheck1 = 0;
-    else
-        ttlCheck1 = 1;
-    end
+    ttlCheck1 = ttlErrorCheck(recDname,getTTLitems);
+else
+    ttlCheck1 = 0;
 end
 % if ~isempty(useIndUD)
 %     useIND = getUpODown;
@@ -1529,6 +1525,23 @@ else
     end
     
 end
+
+end
+
+
+
+function ttlCHECK = ttlErrorCheck(recDname,getTTLitems)
+
+
+load(recDname)
+if isempty(eval(strjoin(getTTLitems{1,1},'_'))) ||...
+        numel(eval(strjoin(getTTLitems{1,1},'_'))) == 1;
+    ttlCHECK = 0;
+else
+    ttlCHECK = 1;
+end
+
+
 
 end
 
