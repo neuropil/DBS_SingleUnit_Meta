@@ -1,4 +1,4 @@
-function Relabel_AO_Depth_v092
+function Relabel_AO_Depth_v093
 % RELABEL_AO_DEPTH VERSION 0.091
 % This function will cycle through Recording days, rename and repack files
 % based on pertient data. 
@@ -888,6 +888,8 @@ end
               listCur = whos;
               curFnames = {listCur.name};
               
+              
+              
               % MER
               ProcDone = 1;
               
@@ -905,9 +907,13 @@ end
               spkNumEx = cellfun(@(x) x{2}, spkNumB,'UniformOutput',false);
               numSpks = numel(unique(spkNumEx));
               
+              uniqueNUMS1 = cellfun(@(x) strsplit(x,'_'), spkBlock , 'UniformOutput', false);
+              uniqueNUMS2 = unique(cell2mat(cellfun(@(x) str2double(x{2}), uniqueNUMS1, 'UniformOutput', false)));
+              
               spkNs = cell(numSpks,1);
               for si = 1:numSpks
-                  spkNs{si} = strcat('CSPK_0',num2str(si));
+                  uniNum = uniqueNUMS2(si);
+                  spkNs{si} = strcat('CSPK_0',num2str(uniNum));
               end
               
               fprintf('Saving MER Data for %s \n',recDname);
@@ -923,7 +929,8 @@ end
               
               mlfpNs = cell(numSpks,1);
               for si = 1:numSpks
-                  mlfpNs{si} = strcat('CLFP_0',num2str(si));
+                  uniNum = uniqueNUMS2(si);
+                  mlfpNs{si} = strcat('CLFP_0',num2str(uniNum));
               end
               
               fprintf('Saving mLFP Data for %s \n',recDname);
@@ -1034,12 +1041,62 @@ end
                       emgNs{si} = strcat('CEMG_2___0',num2str(si));
                   end
                   
-                  fprintf('Saving MER Data for %s \n',recDname);
+                  fprintf('Saving EMG Data for %s \n',recDname);
                   save(recDname,emgNs{:},'emg','-append');
                   
               end
               
+              % EMG Check % process
+              whoS = whos;
+              wspace = {whoS.name};
+              accelCheck1 = sum(contains(wspace,'CACC'));
               
+              if accelCheck1 ~= 0
+                  
+                  accel = struct;
+                  
+                  accel.sampFreqHz = CACC_3___01___Sensor_1___X_KHz*1000;
+                  accel.timeStart = CACC_3___01___Sensor_1___X_TimeBegin;
+                  accel.timeEnd = CACC_3___01___Sensor_1___X_TimeEnd;
+                  accel.bitRes = CACC_3___01___Sensor_1___X_BitResolution; 
+                  accel.gain = CACC_3___01___Sensor_1___X_Gain;
+                  
+                  % Find number of Electrodes
+                  
+                  curWho = whos;
+                  newCurWS = {curWho.name};
+                  findAccel = newCurWS(contains(newCurWS,'CACC'));
+                  
+                  % COUNT Unique SENSORS
+                  
+                  separateNs = cellfun(@(x) strsplit(x,{'_'}), findAccel,'UniformOutput',false);
+                  sensorNums = cellfun(@(x) str2double(x{5}), separateNs);
+                  uniSensNums = unique(sensorNums);
+                  
+%                   accelNums = unique(cellfun(@(x) str2double(x(11)), findAccel,'UniformOutput',true));
+                  
+                  numAccels = length(uniSensNums);
+                  
+                  % Need X , Y , Z for each ACCEL
+                  accDirs = 'XYZ';
+                  for si = 1:numAccels
+                      for xyzi = 1:3
+                          
+                          if si == 2
+                              sensN = xyzi + 3;
+                          else
+                              sensN = xyzi;
+                          end
+                          
+                          accel.(['accS' , num2str(si)])(xyzi,:) = eval(strcat('CACC_3___0',num2str(sensN),...
+                              '___Sensor_',num2str(si),'___',accDirs(xyzi)));
+                      end
+                  end
+                  
+                  fprintf('Saving ACCEL Data for %s \n',recDname);
+                  save(recDname,'accel','-append');
+                  
+              end
               
               
               % EEG check % DETERMINE WAY TO GET names in PROGRAMMATICALLY
@@ -1095,7 +1152,8 @@ end
                       
                       lfpNs = cell(numSpks,1);
                       for si = 1:numSpks
-                          lfpNs{si} = strcat('CMacro_LFP_0',num2str(si));
+                          uniNum = uniqueNUMS2(si);
+                          lfpNs{si} = strcat('CMacro_LFP_0',num2str(uniNum));
                       end
                       
                       fprintf('Saving LFP Data for %s \n',recDname);
