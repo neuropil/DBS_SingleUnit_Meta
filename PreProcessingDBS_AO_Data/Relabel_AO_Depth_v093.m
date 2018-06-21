@@ -1032,13 +1032,24 @@ end
                   curWho = whos;
                   newCurWS = {curWho.name};
                   findEMG = newCurWS(contains(newCurWS,'CEMG'));
-                  emgNums = unique(cellfun(@(x) str2double(x(11)), findEMG,'UniformOutput',true));
+                  
+                  t = cellfun(@(x) replace(x,'_',' '), findEMG,'UniformOutput',false);
+                  t1 = cellfun(@(x) strsplit(x,' '), t,'UniformOutput',false);
+                  
+                  emgNums = unique(cellfun(@(x) str2double(x{3}), t1,'UniformOutput',true));
 
                   numEMGS = length(emgNums);
                   
                   emgNs = cell(numEMGS,1);
                   for si = 1:numEMGS
-                      emgNs{si} = strcat('CEMG_2___0',num2str(si));
+                      
+                      if length(num2str(si)) == 1
+                      
+                         emgNs{si} = strcat('CEMG_2___0',num2str(si));
+                      
+                      else
+                          emgNs{si} = strcat('CEMG_2___',num2str(si));
+                      end
                   end
                   
                   fprintf('Saving EMG Data for %s \n',recDname);
@@ -1471,9 +1482,9 @@ if eegFlag
         
         eegNNames = {'Pz','T7','Fpz','superior_OEye','Lateral_OEye','Cz','EarRef1','EarRef2'};
         
-        eegTab = eegNNames(1:numEEGs)';
+        eegTab = eegNNames(1:8)';
         
-        eegIDs = cell2table([eegNs , eegTab],'VariableNames',{'EEG_Num','EEG_ID'});
+        eegIDs = cell2table([eegNs(1:8) , eegTab],'VariableNames',{'EEG_Num','EEG_ID'});
         
     end
     
