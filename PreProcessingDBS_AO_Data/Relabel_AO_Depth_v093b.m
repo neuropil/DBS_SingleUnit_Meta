@@ -1,4 +1,4 @@
-function Relabel_AO_Depth_v093
+function Relabel_AO_Depth_v093b
 % RELABEL_AO_DEPTH VERSION 0.091
 % This function will cycle through Recording days, rename and repack files
 % based on pertient data. 
@@ -20,7 +20,7 @@ function Relabel_AO_Depth_v093
 
 % Check for access to DBS Data Drive on local computer
 if exist('X:\','dir')
-    AOLoc = 'Y:\AlphaOmegaMatlabData';
+    AOLoc = 'X:\S3_AO_MatlabData_S3\';
     %     POLoc = 'Y:\PreProcessEphysData';
     cd(AOLoc)
     dirfolders = dir;

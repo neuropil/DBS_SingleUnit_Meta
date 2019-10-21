@@ -1,5 +1,5 @@
-function Relabel_AO_Depth_v093
-% RELABEL_AO_DEPTH VERSION 0.091
+function Relabel_AO_Depth_v095(driveLOC , year)
+% RELABEL_AO_DEPTH VERSION 0.094
 % This function will cycle through Recording days, rename and repack files
 % based on pertient data. 
 % Defaults: 
@@ -20,14 +20,18 @@ function Relabel_AO_Depth_v093
 
 % Check for access to DBS Data Drive on local computer
 if exist('X:\','dir')
-    AOLoc = 'Y:\AlphaOmegaMatlabData';
+    if driveLOC
+        AOLoc = ['X:\S3_AO_MatlabData_S3\' , num2str(year)];
+    else
+        AOLoc = 'X:\S3_AO_MatlabData_S3';
+    end
     %     POLoc = 'Y:\PreProcessEphysData';
     cd(AOLoc)
     dirfolders = dir;
     foldernamesTemp = {dirfolders.name};
     foldernamesFinal = foldernamesTemp(~cellfun(@(x) strcmp('.',x(1)),foldernamesTemp));
 else
-    warndlg('Check for Y:\DBS Drive'); % NEED to Obtain access to Drive
+    warndlg('Check for X:\Data'); % NEED to Obtain access to Drive
 end
 
 % Loop through available recording days, differentiate between days that
@@ -57,9 +61,9 @@ for fdir = 1:length(foldernamesFinal)
             
             [dateLoc, ~, diractual, neuroOmFlag] = reNameMove(dateLoc, dai, diractual);
             
-            cd(dateLoc)
+            cd([dateLoc , '\',diractual{dai}])
             % Detemine if files need to be renamed and rename them
-            [~, ~, ~] = checkAndpack(dateLoc, dai, diractual, neuroOmFlag);
+            [~, ~, ~] = checkAndpack(dateLoc, dai, diractual, neuroOmFlag, driveLOC);
             
         end % End of Date loop for Sets
         
@@ -70,7 +74,7 @@ for fdir = 1:length(foldernamesFinal)
         [dateLoc, dai, diractual, neuroOmFlag] = reNameMove(dateLoc, dai, diractual);
         
         % Detemine if files need to be renamed and rename them
-        [~, ~, ~] = checkAndpack(dateLoc, dai, diractual, neuroOmFlag);
+        [~, ~, ~] = checkAndpack(dateLoc, dai, diractual, neuroOmFlag, driveLOC);
         
     end % End of test for Sets
     
@@ -80,7 +84,7 @@ end % End of main function
 
 %% RENAME_FILE FUNCTION
 
-function [newLoc, neuroOmFlag] = rename_file(depthFiles, actFileDir, doneTag)
+function [newLoc, neuroOmFlag] = rename_file(depthFiles, actFileDir, doneTag, driveLOC)
 % RENAME_FILE
 % Performs renaming of recording files. Takes in raw depths and returns
 % either 'Above Target' or 'Below Target' precursor.
@@ -103,7 +107,12 @@ else
 end
 
 oldLoc = pwd;
-newLoc = strcat('Y:\PreProcessEphysData\',actFileDir);
+if driveLOC
+    newLoc = strcat('X:\S4_AO_ProcMatlabData_S4\',actFileDir); % NOT sure if should be S3 or S4?
+    if ~exist(newLoc,'dir')
+        mkdir(newLoc)
+    end
+end
 
 if doneTag == 0
     
@@ -167,10 +176,11 @@ if doneTag == 0
             % Check for TTL file names
             
             if neuroOmFlag
-                ttlCheck = cellfun(@(x) ~isempty(strfind(x,'CDIG_IN')), tTLNames);
+%                 ttlCheck = cellfun(@(x) ~isempty(strfind(x,'CDIG_IN')), tTLNames);
+                ttlCheck = contains(tTLNames,'CDIG_IN');
                 ttlLogInd = find(ttlCheck);
             else
-                ttlCheck = cellfun(@(x) ~isempty(strfind(x,'C1_DI00')), tTLNames);
+                ttlCheck = contains(tTLNames,'C1_DI00');
                 ttlLogInd = find(ttlCheck);
             end
             
@@ -609,7 +619,7 @@ if doneTag == 0
         curFname = depthFiles{fii};
         
         % If already modified skip
-        if ~isempty(strfind(curFname,'Trgt'))
+        if contains(curFname,'Trgt')
             
             % Only Above targets considered NEED to update
             abF_parts = strsplit(curFname,'_');
@@ -897,7 +907,7 @@ end
               
               mer.sampFreqHz = CSPK_01_KHz*1000;
               mer.timeStart = CSPK_01_TimeBegin;
-              mer.timeEnd = CSPK_01_TimeEnd; %#ok<STRNU>
+              mer.timeEnd = CSPK_01_TimeEnd; 
               
               % Find number of Electrodes
               findSpk = strfind(curFnames,'CSPK');
@@ -925,7 +935,7 @@ end
               
               mLFP.sampFreqHz = CLFP_01_KHz*1000;
               mLFP.timeStart = CLFP_01_TimeBegin;
-              mLFP.timeEnd = CLFP_01_TimeEnd; %#ok<STRNU>
+              mLFP.timeEnd = CLFP_01_TimeEnd; 
               
               mlfpNs = cell(numSpks,1);
               for si = 1:numSpks
@@ -1025,7 +1035,7 @@ end
                   emg.sampFreqHz = CEMG_2___01_KHz*1000;
                   emg.timeStart = CEMG_2___01_TimeBegin;
                   emg.timeEnd = CEMG_2___01_TimeEnd;
-                  emg.bitRes = CEMG_2___01_BitResolution; %#ok<STRNU>
+                  emg.bitRes = CEMG_2___01_BitResolution; 
                   
                   % Find number of Electrodes
                   
@@ -1232,7 +1242,7 @@ end
 
 %% SomeOther Function
 
-function [newLoc, lfpBool, toSaveFiles] = RenameCheckLFP(dateLoc, dai, diractual)
+function [newLoc, lfpBool, toSaveFiles] = RenameCheckLFP(dateLoc, dai, diractual, driveLOC)
 % RENAMECHECKLFP
 % Rename files if necessary, determine whether LFPs were recorded and
 % determine whether file should be saved based on recording time length
@@ -1261,9 +1271,13 @@ depthFiles = {depthFilesA_1.name};
 
 testFileA = depthFiles{1};
 
-actFileDir = strrep(tempdateLoc, 'Y:\AlphaOmegaMatlabData\', '');
-
-preProLoc = ['Y:\PreProcessEphysData\' , actFileDir];
+if driveLOC
+    actFileDir = strrep(tempdateLoc, 'X:\S3_AO_MatlabData_S3\', '');
+    preProLoc = ['X:\S4_AO_ProcMatlabData_S4\' , actFileDir];
+else
+    actFileDir = strrep(tempdateLoc, 'Z:\AO_MatlabData_S3\', '');
+    preProLoc = ['X:\S4_AO_ProcMatlabData_S4\' , actFileDir];
+end
 
 if exist(preProLoc,'dir')
     
@@ -1283,10 +1297,10 @@ end
 
 if strcmp(regexp(testFileA,'Trgt','match'),'Trgt')
     doneTag = 1;
-    [newLoc, neuroOmFlag] = rename_file(depthFiles, actFileDir, doneTag);
+    [newLoc, neuroOmFlag] = rename_file(depthFiles, actFileDir, doneTag, driveLOC);
 else
     doneTag = 0;
-    [newLoc, neuroOmFlag] = rename_file(depthFiles, actFileDir, doneTag);
+    [newLoc, neuroOmFlag] = rename_file(depthFiles, actFileDir, doneTag , driveLOC);
 end % End of determine whether already done
 
 cd(newLoc)
@@ -1386,8 +1400,8 @@ block = build_block_AO(ttlDN,...
 
 [toAddTTL_UP, toAddTTL_DN] = Get_ttl_Times_AO(block);
 
-TTL_sp_UP = toAddTTL_UP; %#ok<NASGU>
-TTL_sp_DN = toAddTTL_DN; %#ok<NASGU>
+TTL_sp_UP = toAddTTL_UP; 
+TTL_sp_DN = toAddTTL_DN;
 
 save(ttlInput,'TTL_sp_UP','-append')
 save(ttlInput,'TTL_sp_DN','-append')
@@ -1542,6 +1556,7 @@ if ~isnan(dai)
     cd(neuroChc)
 end
 
+
 % Check if data originated from MICROGUIDE or NEUROOMEGA
 
 fileOrgCheck = dir('*.txt');
@@ -1618,9 +1633,9 @@ end % End of function
 
 
 
-function [preProLoc, lfpBool, toSaveFiles] = checkAndpack(dateLoc, dai, diractual, neuroOmFlag)
+function [preProLoc, lfpBool, toSaveFiles] = checkAndpack(dateLoc, dai, diractual, neuroOmFlag, driveLOC)
 
-[preProLoc, lfpBool, toSaveFiles] = RenameCheckLFP(dateLoc, dai, diractual);
+[preProLoc, lfpBool, toSaveFiles] = RenameCheckLFP(dateLoc, dai, diractual, driveLOC);
 % Skip recording day if already complete
 if isnan(lfpBool) && isnan(toSaveFiles)
     return
