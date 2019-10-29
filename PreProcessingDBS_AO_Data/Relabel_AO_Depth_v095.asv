@@ -492,9 +492,9 @@ if doneTag == 0
                 % Check size of variable
                 if tempExType == 1
                     % Check whether Time or Other stable Value
-                    if ~isempty(strfind(tempExName,'Time')) % if == 1 then has to do with Time
+                    if contains(tempExName,'Time') % if == 1 then has to do with Time
                         % Check if Begin or End
-                        if ~isempty(strfind(tempExName,'Begin'))
+                        if contains(tempExName,'Begin')
                             if isempty(combFstruct.(allOrgNames{exC}))
                                 combFstruct.(allNames{exC}) = combFstruct.(allExtNames{exC});
                             else
@@ -1498,7 +1498,9 @@ if eegFlag
         
         eegTab = eegNNames(1:8)';
         
-        eegIDs = cell2table([eegNs(1:8) , eegTab],'VariableNames',{'EEG_Num','EEG_ID'});
+        if eeg
+        
+        eegIDs = cell2table([eegNs(1:length(eegNs)) , eegTab(1:length(eegNs))],'VariableNames',{'EEG_Num','EEG_ID'});
         
     end
     

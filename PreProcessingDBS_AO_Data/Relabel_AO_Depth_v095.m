@@ -1498,7 +1498,15 @@ if eegFlag
         
         eegTab = eegNNames(1:8)';
         
-        eegIDs = cell2table([eegNs(1:8) , eegTab],'VariableNames',{'EEG_Num','EEG_ID'});
+        if length(eegNs) < 8
+            
+            eegIDs = cell2table([eegNs(1:length(eegNs)) , eegTab(1:length(eegNs))],'VariableNames',{'EEG_Num','EEG_ID'});
+            
+        else
+            
+            eegIDs = cell2table([eegNs(1:8) , eegTab(1:8)],'VariableNames',{'EEG_Num','EEG_ID'});
+            
+        end
         
     end
     
