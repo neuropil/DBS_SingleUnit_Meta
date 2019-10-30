@@ -24,7 +24,7 @@ for s2i = 1:length(s2FoldNs)
     else
         % Make S3 directory
         newS3dirD = [S3_dir , dsh , tmpS2dir];
-        mkdir(newS3dirD);
+        mkdir([S3_dir , dsh , tmpS2dir]);
         % Transfer txt and mat files by set
         % 1. Loop through Sets
         curDIR = [S2_dir , dsh , tmpS2dir];
@@ -35,26 +35,17 @@ for s2i = 1:length(s2FoldNs)
             setFolds = getDirFolders(curDIR);
             for setI = 1:length(setFolds)
                 tmpSEt = [curDIR , dsh , setFolds{setI}];
-                newS3dirS = [newS3dirD , dsh , setFolds{setI}];
-                mkdir(newS3dirS)
+                newS3dir = [S3_dir , dsh , setFolds{setI}];
+                mkdir(tmpSEt)
                 s2matS = getMatNames(tmpSEt);
                 for mmi = 1:length(s2matS)
+                
                     
-                    sourcF = [tmpSEt , dsh , s2matS{mmi}];
-                    destF = [newS3dirS , dsh , s2matS{mmi}];
-                    copyfile(sourcF , destF);
-                    
+                
                 end
             end
         else
-            s2matS = getMatNames(curDIR);
-            for mmi = 1:length(s2matS)
-                
-                sourcF = [curDIR , dsh , s2matS{mmi}];
-                destF = [newS3dirD , dsh , s2matS{mmi}];
-                copyfile(sourcF , destF);
-                
-            end
+            
             
         end
     end
@@ -69,14 +60,14 @@ end % END OF FUNCTION
 function checkSet = checkSets(DIRloc)
 
 
-[outMatNames] = getMatNames(DIRloc);
-
-if isempty(outMatNames)
-    checkSet = 1;
-else
-    checkSet = 0;
-end
-
+ [outMatNames] = getMatNames(DIRloc);
+ 
+ if isempty(outMatNames)
+     checkSet = 1;
+ else
+     checkSet = 0;
+ end
+ 
 
 
 end
@@ -88,7 +79,7 @@ function [outMatNames] = getMatNames(mainDir)
 %   Detailed explanation goes here
 
 cd(mainDir)
-getCons = dir({'*.mat','*.txt'});
+getCons = dir('*.mat');
 outMatNames = {getCons.name};
 
 

@@ -3,7 +3,7 @@ function [] = resetS3_S4_crash(year , surgDATE)
 % 1. Deletes WHOLE FOLDER from date from year in S4
 % 2. Deletes ONLY FILES from date from year in S3
 % 3. RE-COPIES raw files from S2 to S3
-% DEAL WITH SETS!!!!!!!!!!!!!!!!!!!!!!
+% DEAL WITH SETS!!!!!!!!!!!!!!!!!!!!!! STEP 3
 
 dsh = filesep;
 
@@ -25,28 +25,48 @@ end
 
 % # 2 DELETE FILES from S3
 cd(S3_dir)
-s3MatNs = getMatNames(S3_dir);
-for s3i = 1:length(s3MatNs)
+
+ckSet = checkSets(S3_dir);
+
+if ckSet
+    setFolds = getDirFolders(S3_dir);
+    for setI = 1:length(setFolds)
+        tmpSEt = [S3_dir , dsh , setFolds{setI}];
+        s3MatNs = getMatNames(tmpSEt);
+        for s3i = 1:length(s3MatNs)
+            s3DtmpN = s3MatNs{s3i};
+            s3DtmpD = [S3_dir , dsh , s3DtmpN];
+            delete(s3DtmpD);
+        end
+        if exist('RMd_files.txt','file')
+            delete('RMd_files.txt')
+        end
+        
+        if exist('ttlDONE.txt','file')
+            delete('ttlDONE.txt')
+        end
+    end
+else
+    s3MatNs = getMatNames(S3_dir);
+    for s3i = 1:length(s3MatNs)
+        s3DtmpN = s3MatNs{s3i};
+        s3DtmpD = [S3_dir , dsh , s3DtmpN];
+        delete(s3DtmpD);
+    end
+    if exist('RMd_files.txt','file')
+        delete('RMd_files.txt')
+    end
     
-    s3DtmpN = s3MatNs{s3i};
-    s3DtmpD = [S3_dir , dsh , s3DtmpN];
-    delete(s3DtmpD);
+    if exist('ttlDONE.txt','file')
+        delete('ttlDONE.txt')
+    end
     
 end
-
-if exist('RMd_files.txt','file')
-    delete('RMd_files.txt')
-end
-
-if exist('ttlDONE.txt','file')
-    delete('ttlDONE.txt')
-end
-
 disp('STEP 2 DONE!')
 
 
 
-% # 3
+% # 3 #####################################################################
 cd(S2_dir)
 s2MatNs = getMatNames(S2_dir);
 
@@ -74,6 +94,23 @@ function [outMatNames] = getMatNames(mainDir)
 cd(mainDir)
 getCons = dir('*.mat');
 outMatNames = {getCons.name};
+
+
+end
+
+
+
+function checkSet = checkSets(DIRloc)
+
+
+[outMatNames] = getMatNames(DIRloc);
+
+if isempty(outMatNames)
+    checkSet = 1;
+else
+    checkSet = 0;
+end
+
 
 
 end
