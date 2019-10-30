@@ -3,6 +3,7 @@ function [] = resetS3_S4_crash(year , surgDATE)
 % 1. Deletes WHOLE FOLDER from date from year in S4
 % 2. Deletes ONLY FILES from date from year in S3
 % 3. RE-COPIES raw files from S2 to S3
+% DEAL WITH SETS!!!!!!!!!!!!!!!!!!!!!!
 
 dsh = filesep;
 
@@ -11,12 +12,15 @@ S3_dir = ['X:\S3_AO_MatlabData_S3',dsh,num2str(year),dsh,surgDATE];
 S4_dir = ['X:\S4_AO_ProcMatlabData_S4',dsh,num2str(year),dsh,surgDATE];
 
 % # 1 DELETE WHOLE FOLDER from S4
-[status, ~, ~] = rmdir(S4_dir, 's');
-if status
-    disp('File S4 removed!')
-    disp('STEP 1 DONE!')
-else
-    disp('ERROR')
+
+if exist(S4_dir,'dir')
+    [status, ~, ~] = rmdir(S4_dir, 's');
+    if status
+        disp('File S4 removed!')
+        disp('STEP 1 DONE!')
+    else
+        disp('ERROR')
+    end
 end
 
 % # 2 DELETE FILES from S3
@@ -28,15 +32,16 @@ for s3i = 1:length(s3MatNs)
     s3DtmpD = [S3_dir , dsh , s3DtmpN];
     delete(s3DtmpD);
     
-    if exist('RMd_files.txt','file')
-        delete('RMd_files.txt')
-    end
-    
-    if exist('ttlDONE.txt','file')
-        delete('ttlDONE.txt')
-    end
-    
 end
+
+if exist('RMd_files.txt','file')
+    delete('RMd_files.txt')
+end
+
+if exist('ttlDONE.txt','file')
+    delete('ttlDONE.txt')
+end
+
 disp('STEP 2 DONE!')
 
 
