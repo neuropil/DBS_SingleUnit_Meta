@@ -2,31 +2,36 @@ function [] = removeTxtAOS2(year)
 %UNTITLED8 Summary of this function goes here
 %   Detailed explanation goes here
 
-
 mainDir = ['X:\S2_AOUnFMatlabData_S2',filesep,num2str(year)];
-
 
 dateDirFs = getDirFolders(mainDir);
 
-
-
-
-outTxtNames = getTxtNames(mainDir);
-
-if isempty(outTxtNames)
-    disp('Files have already been removed!')
-    return
-else
+for ddi = 1:length(dateDirFs)
+    
+    tmpDateD = [mainDir, filesep, dateDirFs{ddi}];
     
     
-    for di = 1:length(outTxtNames)
-        delTmp = outTxtNames{di};
-        delete(delTmp)
+    ckSet = checkSets(tmpDateD);
+    
+    if ckSet
+    
+    outTxtNames = getTxtNames(tmpDateD);
+    outTxtNames = outTxtNames(~ismember(outTxtNames,{'lfp_yes.txt','NOAO.txt'}));
+    
+    if isempty(outTxtNames)
+        disp('Files have already been removed!')
+        continue
+    else
+        cd(tmpDateD)
+        
+        for di = 1:length(outTxtNames)
+            delTmp = outTxtNames{di};
+            delete(delTmp)
+        end
+        
     end
     
 end
-
-
 
 end
 
@@ -42,6 +47,42 @@ function [outTxtNames] = getTxtNames(mainDir)
 cd(mainDir)
 getCons = dir('*.txt');
 outTxtNames = {getCons.name};
+
+
+end
+
+
+function [outMatNames] = getMatNames(mainDir,matflag)
+%UNTITLED2 Summary of this function goes here
+%   Detailed explanation goes here
+
+cd(mainDir)
+
+if matflag
+    getCons = dir('*.mat');
+else
+    getCons = [dir('*.mat'); dir('*.txt')];
+end
+
+
+outMatNames = {getCons.name};
+
+
+end
+
+
+
+function checkSet = checkSets(DIRloc)
+
+
+[outMatNames] = getMatNames(DIRloc,1);
+
+if isempty(outMatNames)
+    checkSet = 1;
+else
+    checkSet = 0;
+end
+
 
 
 end
