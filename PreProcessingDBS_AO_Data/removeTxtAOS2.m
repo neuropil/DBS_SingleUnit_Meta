@@ -89,7 +89,7 @@ function [] = delTxt(tmpDIR)
         disp('Files have already been removed!')
         return
     else
-        cd(tmpDateD)
+        cd(tmpDIR)
         
         for di = 1:length(outTxtNames)
             delTmp = outTxtNames{di};

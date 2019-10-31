@@ -46,13 +46,18 @@ for ddi = 1:length(dateDirFs)
                 curSetlist = getSetList(outMatNames,ssi);
                 
                 for ci = 1:length(curSetlist)
-                    
-                    
+
                     sourc = [tmpDateD , filesep , curSetlist{ci}];
                     dest = [newSetdir , filesep , curSetlist{ci}];
                     movefile(sourc,dest)
-                    
-                    
+
+                end
+                
+                if year >= 2017
+                    lfpTxt = [newSetdir , filesep , 'lfp_yes.txt'];
+                    NOAOTxt = [newSetdir , filesep , 'NOAO.txt'];
+                    save(lfpTxt)
+                    save(NOAOTxt)
                 end
             end
         end

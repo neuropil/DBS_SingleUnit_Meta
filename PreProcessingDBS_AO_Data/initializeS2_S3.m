@@ -11,10 +11,14 @@ dsh = filesep;
 S2_dir = ['X:\S2_AOUnFMatlabData_S2',dsh,num2str(year)];
 S3_dir = ['X:\S3_AO_MatlabData_S3',dsh,num2str(year)];
 
-
 % Get S2 DIR list
 s2FoldNs = getDirFolders(S2_dir);
-s3FoldNs = getDirFolders(S3_dir);
+if ~exist(S3_dir,'dir')
+    mkdir(S3_dir)
+    s3FoldNs = getDirFolders(S3_dir);
+else
+    s3FoldNs = getDirFolders(S3_dir);
+end
 
 for s2i = 1:length(s2FoldNs)
     tmpS2dir = s2FoldNs{s2i};
@@ -55,7 +59,6 @@ for s2i = 1:length(s2FoldNs)
                 copyfile(sourcF , destF);
                 
             end
-            
         end
     end
 end
