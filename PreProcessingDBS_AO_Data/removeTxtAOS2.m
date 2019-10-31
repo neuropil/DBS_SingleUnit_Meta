@@ -36,7 +36,7 @@ end
 
 
 
-
+%%%% GETTEXTNAMES FUNCTION
 function [outTxtNames] = getTxtNames(mainDir)
 %UNTITLED2 Summary of this function goes here
 %   Detailed explanation goes here
@@ -47,9 +47,7 @@ outTxtNames = {getCons.name};
 end
 
 
-
-
-
+%%%% GETMATNAMES FUNCTION
 function [outMatNames] = getMatNames(mainDir,matflag)
 %UNTITLED2 Summary of this function goes here
 %   Detailed explanation goes here
@@ -67,7 +65,7 @@ outMatNames = {getCons.name};
 end
 
 
-
+%%%% CHECKSETS FUNCTION
 function checkSet = checkSets(DIRloc)
 
 [outMatNames] = getMatNames(DIRloc,1);
@@ -81,11 +79,7 @@ end
 end
 
 
-
-
-
-
-
+%%%% DELTEXT FUNCTION
 function [] = delTxt(tmpDIR)
 
     outTxtNames = getTxtNames(tmpDIR);
