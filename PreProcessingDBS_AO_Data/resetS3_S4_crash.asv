@@ -34,7 +34,7 @@ if ckSet
         s3MatNs = getMatNames(tmpSEt,1);
         for s3i = 1:length(s3MatNs)
             s3DtmpN = s3MatNs{s3i};
-            s3DtmpD = [tmpSEt , dsh , s3DtmpN];
+            s3DtmpD = [S3_dir , dsh , s3DtmpN];
             delete(s3DtmpD);
         end
         if exist('RMd_files.txt','file')
@@ -74,38 +74,63 @@ ckSet2 = checkSets(S2_dir);
 if ckSet2
     setFolds2 = getDirFolders(S2_dir);
     for setI = 1:length(setFolds2)
-        Sdir2_tmp = [S2_dir , dsh , setFolds2{setI}];
-        Sdir3_tmp = [S3_dir , dsh , setFolds2{setI}];
-        s2MatNs = getMatNames(Sdir2_tmp,0);
-        for s23i = 1:length(s2MatNs)
-            
-            s2tmp = s2MatNs{s23i};
-            s2tmpD = [Sdir2_tmp , dsh , s2tmp];
-            s3tmpD = [Sdir3_tmp , dsh , s2tmp];
-            
-            copyfile(s2tmpD , s3tmpD);
+        tmpSEt2 = [S2_dir , dsh , setFolds2{setI}];
+        s2MatNs = getMatNames(tmpSEt2,0);
+        for s3i = 1:length(s3MatNs)
+            s3DtmpN = s3MatNs{s3i};
+            s3DtmpD = [S3_dir , dsh , s3DtmpN];
+            delete(s3DtmpD);
+        end
+        if exist('RMd_files.txt','file')
+            delete('RMd_files.txt')
         end
         
+        if exist('ttlDONE.txt','file')
+            delete('ttlDONE.txt')
+        end
     end
 else
+    s3MatNs = getMatNames(S3_dir);
+    for s3i = 1:length(s3MatNs)
+        s3DtmpN = s3MatNs{s3i};
+        s3DtmpD = [S3_dir , dsh , s3DtmpN];
+        delete(s3DtmpD);
+    end
+    if exist('RMd_files.txt','file')
+        delete('RMd_files.txt')
+    end
     
-    s2MatNs = getMatNames(S2_dir);
-    for s23i = 1:length(s2MatNs)
-        
-        s2tmp = s2MatNs{s23i};
-        s2tmpD = [S2_dir , dsh , s2tmp];
-        s3tmpD = [S3_dir , dsh , s2tmp];
-        
-        copyfile(s2tmpD , s3tmpD);
-        
+    if exist('ttlDONE.txt','file')
+        delete('ttlDONE.txt')
     end
     
 end
+disp('STEP 2 DONE!')
+
+
+
+
+
+
+
+
+
+
+
+
+
+s2MatNs = getMatNames(S2_dir);
+
+for s23i = 1:length(s2MatNs)
+    
+    s2tmp = s2MatNs{s23i};
+    s2tmpD = [S2_dir , dsh , s2tmp];
+    s3tmpD = [S3_dir , dsh , s2tmp];
+    
+    copyfile(s2tmpD , s3tmpD);
+    
+end
 disp('STEP 3 DONE!')
-
-
-
-
 
 end
 
@@ -122,7 +147,7 @@ cd(mainDir)
 if matflag
     getCons = dir('*.mat');
 else
-    getCons = [dir('*.mat'); dir('*.txt')];
+    getCons = dir({'*.mat','*.txt'});
 end
 
 

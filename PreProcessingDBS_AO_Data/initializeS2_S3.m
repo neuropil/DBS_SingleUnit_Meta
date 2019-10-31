@@ -88,7 +88,7 @@ function [outMatNames] = getMatNames(mainDir)
 %   Detailed explanation goes here
 
 cd(mainDir)
-getCons = dir({'*.mat','*.txt'});
+getCons = [dir('*.mat'); dir('*.txt')];
 outMatNames = {getCons.name};
 
 
