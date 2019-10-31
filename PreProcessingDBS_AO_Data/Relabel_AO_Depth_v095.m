@@ -54,12 +54,14 @@ for fdir = 1:length(foldernamesFinal)
     dirDateFiles = dir('*.mat');
     
     % If there are Sets, then cycle through each Set
-    if strcmp(testfile,'Set1') && isempty(dirDateFiles)
+    if contains(testfile,'Set') && isempty(dirDateFiles)
         
         % Loop through each Set
         for dai = 1:length(diractual)
             
-            [dateLoc, ~, diractual, neuroOmFlag] = reNameMove(dateLoc, dai, diractual);
+            daiN = diractual{dai}(4);
+            
+            [dateLoc, ~, diractual, neuroOmFlag] = reNameMove(dateLoc, daiN, diractual);
             
             cd([dateLoc , '\',diractual{dai}])
             % Detemine if files need to be renamed and rename them

@@ -54,10 +54,12 @@ for fdir = 1:length(foldernamesFinal)
     dirDateFiles = dir('*.mat');
     
     % If there are Sets, then cycle through each Set
-    if strcmp(testfile,'Set1') && isempty(dirDateFiles)
+    if contains(testfile,'Set') && isempty(dirDateFiles)
         
         % Loop through each Set
         for dai = 1:length(diractual)
+            
+            daiN = diractual{dai}
             
             [dateLoc, ~, diractual, neuroOmFlag] = reNameMove(dateLoc, dai, diractual);
             
@@ -1498,9 +1500,15 @@ if eegFlag
         
         eegTab = eegNNames(1:8)';
         
-        if eeg
-        
-        eegIDs = cell2table([eegNs(1:length(eegNs)) , eegTab(1:length(eegNs))],'VariableNames',{'EEG_Num','EEG_ID'});
+        if length(eegNs) < 8
+            
+            eegIDs = cell2table([eegNs(1:length(eegNs)) , eegTab(1:length(eegNs))],'VariableNames',{'EEG_Num','EEG_ID'});
+            
+        else
+            
+            eegIDs = cell2table([eegNs(1:8) , eegTab(1:8)],'VariableNames',{'EEG_Num','EEG_ID'});
+            
+        end
         
     end
     
