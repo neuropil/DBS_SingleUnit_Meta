@@ -26,7 +26,9 @@ for ddi = 1:length(dateDirFs)
     if ckSet
         continue
     else
-        numSETS = max(cellfun(@(x) str2double(x(3)), outMatNames));
+        setNUMS = unique(cellfun(@(x) str2double(x(3)), outMatNames));
+        numSETS = numel(setNUMS);
+        
         
         if numSETS == 1
             if year >= 2017
@@ -38,12 +40,14 @@ for ddi = 1:length(dateDirFs)
             % Create SETS and add TXTS
             for ssi = 1:numSETS
                 
-                newSetdir = [tmpDateD , filesep , 'Set' , num2str(ssi)];
+                setNid = setNUMS(ssi);
+                
+                newSetdir = [tmpDateD , filesep , 'Set' , num2str(setNid)];
                 if ~exist(newSetdir,'dir')
                     mkdir(newSetdir)
                 end
                 
-                curSetlist = getSetList(outMatNames,ssi);
+                curSetlist = getSetList(outMatNames,setNid);
                 
                 for ci = 1:length(curSetlist)
 
