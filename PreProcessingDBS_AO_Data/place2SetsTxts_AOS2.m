@@ -4,7 +4,7 @@ function [] = place2SetsTxts_AOS2(year)
 
 removeTxtAOS2(year)
 
-mainDir = ['X:\S2_AOUnFMatlabData_S2',filesep,num2str(year)];
+mainDir = ['Y:\S2_AOUnFMatlabData_S2',filesep,num2str(year)];
 
 dateDirFs = getDirFolders(mainDir);
 
