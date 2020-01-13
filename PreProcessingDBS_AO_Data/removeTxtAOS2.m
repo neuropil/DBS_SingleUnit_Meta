@@ -2,7 +2,7 @@ function [] = removeTxtAOS2(year)
 %UNTITLED8 Summary of this function goes here
 %   Detailed explanation goes here
 
-mainDir = ['Y:\S2_AOUnFMatlabData_S2',filesep,num2str(year)];
+mainDir = ['W:\S2_AOUnFMatlabData_S2',filesep,num2str(year)];
 
 dateDirFs = getDirFolders(mainDir);
 

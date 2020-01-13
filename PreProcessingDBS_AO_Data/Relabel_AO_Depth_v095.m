@@ -19,11 +19,11 @@ function Relabel_AO_Depth_v095(driveLOC , year)
 % #########################################################################
 
 % Check for access to DBS Data Drive on local computer
-if exist('Y:\','dir')
+if exist('W:\','dir')
     if driveLOC
-        AOLoc = ['Y:\S3_AO_MatlabData_S3\' , num2str(year)];
+        AOLoc = ['W:\S3_AO_MatlabData_S3\' , num2str(year)];
     else
-        AOLoc = 'Y:\S3_AO_MatlabData_S3';
+        AOLoc = 'W:\S3_AO_MatlabData_S3';
     end
     %     POLoc = 'Y:\PreProcessEphysData';
     cd(AOLoc)
@@ -31,7 +31,7 @@ if exist('Y:\','dir')
     foldernamesTemp = {dirfolders.name};
     foldernamesFinal = foldernamesTemp(~cellfun(@(x) strcmp('.',x(1)),foldernamesTemp));
 else
-    warndlg('Check for Y:\Data'); % NEED to Obtain access to Drive
+    warndlg('Check for W:\Data'); % NEED to Obtain access to Drive
 end
 
 % Loop through available recording days, differentiate between days that
@@ -110,7 +110,7 @@ end
 
 oldLoc = pwd;
 if driveLOC
-    newLoc = strcat('Y:\S4_AO_ProcMatlabData_S4\',actFileDir); % NOT sure if should be S3 or S4?
+    newLoc = strcat('W:\S4_AO_ProcMatlabData_S4\',actFileDir); % NOT sure if should be S3 or S4?
     if ~exist(newLoc,'dir')
         mkdir(newLoc)
     end
@@ -1303,11 +1303,11 @@ depthFiles = {depthFilesA_1.name};
 testFileA = depthFiles{1};
 
 if driveLOC
-    actFileDir = strrep(tempdateLoc, 'Y:\S3_AO_MatlabData_S3\', '');
-    preProLoc = ['Y:\S4_AO_ProcMatlabData_S4\' , actFileDir];
+    actFileDir = strrep(tempdateLoc, 'W:\S3_AO_MatlabData_S3\', '');
+    preProLoc = ['W:\S4_AO_ProcMatlabData_S4\' , actFileDir];
 else
-    actFileDir = strrep(tempdateLoc, 'Z:\AO_MatlabData_S3\', '');
-    preProLoc = ['Y:\S4_AO_ProcMatlabData_S4\' , actFileDir];
+    actFileDir = strrep(tempdateLoc, 'W:\AO_MatlabData_S3\', '');
+    preProLoc = ['W:\S4_AO_ProcMatlabData_S4\' , actFileDir];
 end
 
 if exist(preProLoc,'dir')
