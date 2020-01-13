@@ -7,9 +7,9 @@ function [] = resetS3_S4_crash(year , surgDATE)
 
 dsh = filesep;
 
-S2_dir = ['X:\S2_AOUnFMatlabData_S2',dsh,num2str(year),dsh,surgDATE];
-S3_dir = ['X:\S3_AO_MatlabData_S3',dsh,num2str(year),dsh,surgDATE];
-S4_dir = ['X:\S4_AO_ProcMatlabData_S4',dsh,num2str(year),dsh,surgDATE];
+S2_dir = ['Y:\S2_AOUnFMatlabData_S2',dsh,num2str(year),dsh,surgDATE];
+S3_dir = ['Y:\S3_AO_MatlabData_S3',dsh,num2str(year),dsh,surgDATE];
+S4_dir = ['Y:\S4_AO_ProcMatlabData_S4',dsh,num2str(year),dsh,surgDATE];
 
 % # 1 DELETE WHOLE FOLDER from S4
 if exist(S4_dir,'dir')

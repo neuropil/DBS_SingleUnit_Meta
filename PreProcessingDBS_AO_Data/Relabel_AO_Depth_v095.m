@@ -1,8 +1,8 @@
 function Relabel_AO_Depth_v095(driveLOC , year)
 % RELABEL_AO_DEPTH VERSION 0.094
 % This function will cycle through Recording days, rename and repack files
-% based on pertient data. 
-% Defaults: 
+% based on pertient data.
+% Defaults:
 % 1. Will only store recording files that have recording times longer than 10s
 % 2. Will delete non-used LFP recordings based on CV
 % 3. Will only store Electrode1 and LFP1 sampling frequency.
@@ -14,7 +14,7 @@ function Relabel_AO_Depth_v095(driveLOC , year)
 % Recent Update: 08/04/2015 Version 06 - Updated to evaluate NeuroOmega files
 % Recent Update: 09/15/2015 Version 07 - Updated to evaluate EEG data
 % Recent Update: 10/20/2015 Version 08 - REMOVE Anatomy from and revise EEG
-% Recent Update: 10/26/2015 Version 09 
+% Recent Update: 10/26/2015 Version 09
 % #########################################################################
 % #########################################################################
 
@@ -178,7 +178,7 @@ if doneTag == 0
             % Check for TTL file names
             
             if neuroOmFlag
-%                 ttlCheck = cellfun(@(x) ~isempty(strfind(x,'CDIG_IN')), tTLNames);
+                %                 ttlCheck = cellfun(@(x) ~isempty(strfind(x,'CDIG_IN')), tTLNames);
                 ttlCheck = contains(tTLNames,'CDIG_IN');
                 ttlLogInd = find(ttlCheck);
             else
@@ -246,7 +246,7 @@ if doneTag == 0
         save('ttlDONE.txt')
         
     end
-
+    
     fiExtInd = cellfun(@(x) length(x) > 10, depthFiles);
     numExts = sum(fiExtInd);
     % Get actual names, so index can be dynamic in for loop
@@ -260,11 +260,11 @@ if doneTag == 0
     % exceeds the sampling frequency (i.e. either greater than ~80
     % uSeconds), then it is likely a repass. Encode as previously :
     % increase micron integer by 1.
-
+    
     fprintf('%d extension files to check\n',numExts);
     for fiiT = 1:numExts
         
-
+        
         extF = fiExtFnames{fiiT};
         if strcmp(extF(1),'n')
             findOrig = extF([1:6,length(extF)-3:end]);
@@ -297,13 +297,13 @@ if doneTag == 0
         load(extF);
         % Rename extF files
         combFstruct = struct;
-
+        
         newExtNames = cellfun(@(x) strcat(x,'_ext'), extMatNames, 'UniformOutput', false);
-
-%         newOrgNames = cellfun(@(x) strcat(x,'_org'), extMatNames, 'UniformOutput', false);
+        
+        %         newOrgNames = cellfun(@(x) strcat(x,'_org'), extMatNames, 'UniformOutput', false);
         for exE = 1:length(extMatNames)
-%             combFstruct.(extMatNames{exE}) = [];
-%             combFstruct.(newOrgNames{exE}) = [];
+            %             combFstruct.(extMatNames{exE}) = [];
+            %             combFstruct.(newOrgNames{exE}) = [];
             combFstruct.(newExtNames{exE}) = eval(extMatNames{exE});
         end
         
@@ -347,12 +347,12 @@ if doneTag == 0
                 else
                     startInt = startInt + 1;
                 end
-
+                
             end
             load(findOrig);
             orgMatobj = matfile(findOrig);
             orgMatinfo = whos(orgMatobj);
-%             orgMatNames = {orgMatinfo.name};
+            %             orgMatNames = {orgMatinfo.name};
         end
         
         % There is a mismatch between when the Original file has files that
@@ -415,10 +415,10 @@ if doneTag == 0
             end
             
         else
-%             leftIDs = find(wLeft);
+            %             leftIDs = find(wLeft);
             for iiii = 1:length(allNames)
                 
-%                 indNum = leftIDs(iiii);
+                %                 indNum = leftIDs(iiii);
                 
                 combFstruct.(allNames{iiii}) = [];
                 combCase = allNid(iiii);
@@ -436,7 +436,7 @@ if doneTag == 0
                 fprintf('Field %d out of %d DONE! \n',iiii,length(allNames))
             end
         end
-
+        
         % Determine if files should be stitched or not
         if neuroOmFlag
             
@@ -514,7 +514,7 @@ if doneTag == 0
                 else % Is Spike or LFP voltage trace
                     
                     combFstruct.(allNames{exC}) = [combFstruct.(allOrgNames{exC}),combFstruct.(allExtNames{exC})];
-
+                    
                 end
                 % Overwrite workspace OrgVal with new OrgVal for final save
                 clear(allNames{exC})
@@ -533,7 +533,7 @@ if doneTag == 0
         delete(extF);
         
         fprintf('Completed # %d extension file \n',fiiT);
-
+        
     end
     
     %%%%% REMOVE ANATOMY NAMES NEUROMEGA
@@ -550,6 +550,9 @@ if doneTag == 0
         anatMatNames = {anatMatStrc.name};
         
         anatSpkCell = strfind(anatMatNames,'CSPK_01');
+        if sum(cellfun(@(x) ~isempty(x), anatSpkCell)) == 0
+            anatSpkCell = strfind(anatMatNames,'CSPK_02');
+        end
         anatSpks = anatMatNames(cellfun(@(x) ~isempty(x), anatSpkCell, 'UniformOutput', true));
         
         anatNall = cellfun(@(x) strsplit(x,'_'), anatSpks, 'UniformOutput', false);
@@ -578,7 +581,7 @@ if doneTag == 0
                 
                 oSVars = struct;
                 for ati2 = 1:length(tempANames)
-                   
+                    
                     if antIndex(ati2) == 0
                         oSVars.(tempANames{ati2}) = eval(tempANames{ati2});
                     else
@@ -616,7 +619,7 @@ if doneTag == 0
             end
         end
     end
-
+    
     for fii = 1:length(depthFiles)
         curFname = depthFiles{fii};
         
@@ -666,7 +669,7 @@ if doneTag == 0
                 
                 blParts = strsplit(depthFiles{fii},'.');
                 tempDepth = blParts{1};
-
+                
                 if length(tempDepth) > 6
                     stRempDepth = tempDepth(2:6);
                     newblTempDepth1 = num2str(abs(str2double(stRempDepth) + blVCount));
@@ -688,7 +691,7 @@ if doneTag == 0
                 end
                 
                 blDSOrigName{btCount,1} = curFname;
-
+                
                 blDSNum(btCount,1) = btCount;
                 btCount = btCount + 1;
             end
@@ -721,7 +724,7 @@ if doneTag == 0
     else
         abDSOrigName = flipud(abDSOrigName);
     end
-
+    
     
     for abi = 1:height(abvOutT)
         
@@ -735,8 +738,8 @@ if doneTag == 0
     blDSDepthAct = blDSDepthAct(cellfun(@(x) ~isempty(x), blDSDepthAct));
     blDSDepthNum = blDSDepthNum(~isnan(blDSDepthNum));
     blDSNum = blDSNum(~isnan(blDSNum));
-
-%     blDSOrigName = flipud(blDSOrigName);
+    
+    %     blDSOrigName = flipud(blDSOrigName);
     
     % Below Target
     blDSOrigName = blDSOrigName(cellfun(@(x) ~isempty(x), blDSOrigName));
@@ -768,7 +771,7 @@ if doneTag == 0
         copyfile(alltempFname,allnewFname);
         
     end
-
+    
 else
     
     allFilesL = dir('*.txt');
@@ -808,7 +811,7 @@ end % End of function
 
 function [ProcDone] = CleanPackData(recDname, LFPcheck, preProLoc, neuroCheck, eegCheck, eegLabels)
 % CLEANPACKDATA
-% Performs repacking of recording files. Removes unnecessary files created by 
+% Performs repacking of recording files. Removes unnecessary files created by
 % AlphaOmega system. Resaves in duplicate directory with fewer files.
 
 % Inputs:
@@ -826,7 +829,7 @@ function [ProcDone] = CleanPackData(recDname, LFPcheck, preProLoc, neuroCheck, e
 cd(preProLoc)
 
 % 1. Do a matfile check
-% 2. Load in files separately 
+% 2. Load in files separately
 
 matAll = matfile(recDname);
 matInfo = who(matAll);
@@ -835,10 +838,10 @@ matInfo = who(matAll);
 
 if neuroCheck
     ttlLogic = cellfun(@(x) ~isempty(strfind(x,'CDIG_IN')), matInfo);
-%     ttlLogInd = find(ttlLogic);
+    %     ttlLogInd = find(ttlLogic);
 else
     ttlLogic = cellfun(@(x) ~isempty(strfind(x,'C1_DI00')), matInfo);
-%     ttlLogInd = find(ttlLogic);
+    %     ttlLogInd = find(ttlLogic);
 end
 
 ttlCheck0 = any(ttlLogic);
@@ -865,7 +868,7 @@ end
 
 if ttlCheck1
     % Check if there are 'C1' files indicative of a TTL signature
-%     ttLoc = cellfun(@(x) ismember(x,{'C1_DI001_Down','C1_DI001_Up'}),matInfo);
+    %     ttLoc = cellfun(@(x) ismember(x,{'C1_DI001_Down','C1_DI001_Up'}),matInfo);
     % Check if they are Up and Down vectors
     if ~isempty(useIndUD)
         % Find the first index of UP or DOWN
@@ -886,359 +889,385 @@ else
 end
 
 % BASELINE SAVE MER
-   % CHECK FOR TTL 
-      % SAVE TTL
+% CHECK FOR TTL
+% SAVE TTL
 
-      if ismember('ProcDone',matInfo)
-          ProcDone = nan;
-          return
-      else
-          load(recDname)
-          
-          if neuroCheck
+if ismember('ProcDone',matInfo)
+    ProcDone = nan;
+    return
+else
+    load(recDname)
+    
+    if neuroCheck
+        
+        listCur = whos;
+        curFnames = {listCur.name};
+        
+        
+        
+        % MER
+        ProcDone = 1;
+        
+        mer = struct;
+        
+        try
+            mer.sampFreqHz = CSPK_01_KHz*1000;
+            mer.timeStart = CSPK_01_TimeBegin;
+            mer.timeEnd = CSPK_01_TimeEnd;
+        catch
+            mer.sampFreqHz = CSPK_02_KHz*1000;
+            mer.timeStart = CSPK_02_TimeBegin;
+            mer.timeEnd = CSPK_02_TimeEnd;
+        end
+        
+        
+        % Find number of Electrodes
+        findSpk = strfind(curFnames,'CSPK');
+        spkBlock = curFnames(cellfun(@(x) ~isempty(x), findSpk));
+        
+        spkNumB = cellfun(@(x) strsplit(x,'_'), spkBlock,'UniformOutput',false);
+        spkNumEx = cellfun(@(x) x{2}, spkNumB,'UniformOutput',false);
+        numSpks = numel(unique(spkNumEx));
+        
+        uniqueNUMS1 = cellfun(@(x) strsplit(x,'_'), spkBlock , 'UniformOutput', false);
+        uniqueNUMS2 = unique(cell2mat(cellfun(@(x) str2double(x{2}), uniqueNUMS1, 'UniformOutput', false)));
+        
+        spkNs = cell(numSpks,1);
+        for si = 1:numSpks
+            uniNum = uniqueNUMS2(si);
+            spkNs{si} = strcat('CSPK_0',num2str(uniNum));
+        end
+        
+        fprintf('Saving MER Data for %s \n',recDname);
+        save(recDname,spkNs{:},'mer','ProcDone');
+        
+        % microLFP
+        
+        mLFP = struct;
+        
+        
+        try
+            mLFP.sampFreqHz = CLFP_01_KHz*1000;
+            mLFP.timeStart = CLFP_01_TimeBegin;
+            mLFP.timeEnd = CLFP_01_TimeEnd;
+        catch
+            mLFP.sampFreqHz = CLFP_02_KHz*1000;
+            mLFP.timeStart = CLFP_02_TimeBegin;
+            mLFP.timeEnd = CLFP_02_TimeEnd;
+        end
+        
+        mlfpNs = cell(numSpks,1);
+        for si = 1:numSpks
+            uniNum = uniqueNUMS2(si);
+            mlfpNs{si} = strcat('CLFP_0',num2str(uniNum));
+        end
+        
+        fprintf('Saving mLFP Data for %s \n',recDname);
+        save(recDname,mlfpNs{:},'mLFP','-append');
+        
+        % Segmentation Check
+        findSeg = strfind(curFnames,'CSEG');
+        segBlock = cellfun(@(x) ~isempty(x),findSeg);
+        if sum(segBlock) ~= 0
+            segNames = curFnames(segBlock);
+            segNums = unique(cellfun(@(x) str2double(x(7)), segNames));
+            
+            % Looks for Level and Level Seg
+            findLevlS = strfind(curFnames,'LEVEL_SEG');
+            ls_block = cellfun(@(x) ~isempty(x), findLevlS);
+            
+            findLevl = strfind(curFnames(~ls_block),'LEVEL');
+            l_block = cellfun(@(x) ~isempty(x), findLevl);
+            
+            segSaveS = cell(1,length(segNums)*2);
+            si = 1;
+            linCount = 1;
+            while si <= length(segNums)
+                if sum(l_block) ~= 0
+                    segSaveS{linCount} = strcat('CSEG_0',num2str(segNums(si)),'_LEVEL');
+                    linCount = linCount + 1;
+                end
+                if sum(ls_block) ~= 0
+                    segSaveS{linCount} = strcat('CSEG_0',num2str(segNums(si)),'_LEVEL_SEG');
+                    linCount = linCount + 1;
+                end
+                si = si + 1;
+            end
+            
+            segSaveS = segSaveS(cellfun(@(x) ~isempty(x), segSaveS));
+            
+            spkSeg = struct;
+            
+            spkSeg.sampFreqHz = eval(strcat('CSEG_0',num2str(segNums(1)),'_KHz'));
+            spkSeg.timeStart = eval(strcat('CSEG_0',num2str(segNums(1)),'_TimeBegin'));
+            spkSeg.timeEnd = eval(strcat('CSEG_0',num2str(segNums(1)),'_TimeEnd'));
+            
+            fprintf('Saving SEG Data for %s \n',recDname);
+            
+            lookSeq = zeros(1,length(segSaveS));
+            for lii = 1:length(segSaveS)
+                
+                if ~exist(segSaveS{lii},'var')
+                    lookSeq(lii) = 0;
+                else
+                    lookSeq(lii) = 1;
+                end
+                
+            end
+            
+            if all(lookSeq)
+                save(recDname,segSaveS{:},'spkSeg','-append');
+            end
+            
+        end
+        
+        % TTL extract
+        if ttlCheck2
+            
+            ttlName = strcat(getTTLitems{useIndUD(1)}{1},'_',getTTLitems{useIndUD(1)}{2},'_',...
+                getTTLitems{useIndUD(1)}{3},'_');
+            
+            ttlInfo.ttl_up = eval(strcat(ttlName,'Up'));
+            ttlInfo.ttl_dn = eval(strcat(ttlName,'Down'));
+            ttlInfo.ttl_sf = eval(strcat(ttlName,'KHz'));
+            ttlInfo.ttlTimeBegin = eval(strcat(ttlName,'TimeBegin'));
+            ttlInfo.ttlTimeEnd = eval(strcat(ttlName,'TimeEnd'));
+            ttlInfo.ttlTimesUp = TTL_sp_UP;
+            ttlInfo.ttlTimesDn = TTL_sp_DN;
+            
+            fprintf('Saving TTL Data for %s \n',recDname);
+            
+            save(recDname,'ttlInfo','-append');
+            
+        end
+        
+        
+        % EMG Check % process
+        whoS = whos;
+        wspace = {whoS.name};
+        emgCheck1 = sum(contains(wspace,'CEMG'));
+        
+        if emgCheck1 ~= 0
+            
+            emg = struct;
+            
+            emg.sampFreqHz = CEMG_2___01_KHz*1000;
+            emg.timeStart = CEMG_2___01_TimeBegin;
+            emg.timeEnd = CEMG_2___01_TimeEnd;
+            emg.bitRes = CEMG_2___01_BitResolution;
+            
+            % Find number of Electrodes
+            
+            curWho = whos;
+            newCurWS = {curWho.name};
+            findEMG = newCurWS(contains(newCurWS,'CEMG'));
+            
+            t = cellfun(@(x) replace(x,'_',' '), findEMG,'UniformOutput',false);
+            t1 = cellfun(@(x) strsplit(x,' '), t,'UniformOutput',false);
+            
+            emgNums = unique(cellfun(@(x) str2double(x{3}), t1,'UniformOutput',true));
+            
+            numEMGS = length(emgNums);
+            
+            emgNs = cell(numEMGS,1);
+            for si = 1:numEMGS
+                
+                if length(num2str(si)) == 1
+                    
+                    emgNs{si} = strcat('CEMG_2___0',num2str(si));
+                    
+                else
+                    emgNs{si} = strcat('CEMG_2___',num2str(si));
+                end
+            end
+            
+            fprintf('Saving EMG Data for %s \n',recDname);
+            save(recDname,emgNs{:},'emg','-append');
+            
+        end
+        
+        % EMG Check % process
+        whoS = whos;
+        wspace = {whoS.name};
+        accelCheck1 = sum(contains(wspace,'CACC'));
+        
+        if accelCheck1 ~= 0
+            
+            accel = struct;
+            
+            accel.sampFreqHz = CACC_3___01___Sensor_1___X_KHz*1000;
+            accel.timeStart = CACC_3___01___Sensor_1___X_TimeBegin;
+            accel.timeEnd = CACC_3___01___Sensor_1___X_TimeEnd;
+            accel.bitRes = CACC_3___01___Sensor_1___X_BitResolution;
+            accel.gain = CACC_3___01___Sensor_1___X_Gain;
+            
+            % Find number of Electrodes
+            
+            curWho = whos;
+            newCurWS = {curWho.name};
+            findAccel = newCurWS(contains(newCurWS,'CACC'));
+            
+            % COUNT Unique SENSORS
+            
+            separateNs = cellfun(@(x) strsplit(x,{'_'}), findAccel,'UniformOutput',false);
+            sensorNums = cellfun(@(x) str2double(x{5}), separateNs);
+            uniSensNums = unique(sensorNums);
+            
+            %                   accelNums = unique(cellfun(@(x) str2double(x(11)), findAccel,'UniformOutput',true));
+            
+            numAccels = length(uniSensNums);
+            
+            % Need X , Y , Z for each ACCEL
+            accDirs = 'XYZ';
+            for si = 1:numAccels
+                for xyzi = 1:3
+                    
+                    if si == 2
+                        sensN = xyzi + 3;
+                    else
+                        sensN = xyzi;
+                    end
+                    
+                    accel.(['accS' , num2str(si)]){xyzi} = eval(strcat('CACC_3___0',num2str(sensN),...
+                        '___Sensor_',num2str(si),'___',accDirs(xyzi)));
+                end
+            end
+            
+            fprintf('Saving ACCEL Data for %s \n',recDname);
+            save(recDname,'accel','-append');
+            
+        end
+        
+        
+        % EEG check % DETERMINE WAY TO GET names in PROGRAMMATICALLY
+        if eegCheck
+            
+            eeg = struct;
+            
+            if ~exist('CEEG_1___06','var')
+                eegTempName = strcat('CEEG_1___06___',eegLabels.EEG_ID{6});
+            else
+                eegTempName = 'CEEG_1___06';
+            end
+            
+            eeg.sampFreqHz = eval(strcat(eegTempName,'_KHz'))*1000;
+            eeg.timeStart = eval(strcat(eegTempName,'_TimeBegin'));
+            eeg.timeEnd = eval(strcat(eegTempName,'_TimeEnd'));
+            eeg.bitRes = eval(strcat(eegTempName,'_BitResolution'));
+            eeg.labels = eegLabels;
+            
+            numEEGs = size(eegLabels,1);
+            
+            eegSaveS = cell(numEEGs,1);
+            
+            if ~exist('CEEG_1___06','var')
+                
+                for eei = 1:numEEGs
+                    eegSaveS{eei} = strcat('CEEG_1___0',num2str(eei),'___',eegLabels.EEG_ID{eei});
+                end
+                
+            else
+                
+                for eei = 1:numEEGs
+                    eegSaveS{eei} = strcat('CEEG_1___0',num2str(eei));
+                end
+                
+            end
+            
+            fprintf('Saving EEG Data for %s \n',recDname);
+            
+            save(recDname, eegSaveS{:},'eeg','-append');
+            
+        end
+        
+        
+        % LFP
+        if LFPcheck
+            
+            lfp = struct;
+            try
+                lfp.sampFreqHz = CMacro_LFP_01_KHz*1000;
+                lfp.timeStart = CMacro_LFP_01_TimeBegin;
+                lfp.timeEnd = CMacro_LFP_01_TimeEnd;
+                
+                lfpNs = cell(numSpks,1);
+                for si = 1:numSpks
+                    uniNum = uniqueNUMS2(si);
+                    lfpNs{si} = strcat('CMacro_LFP_0',num2str(uniNum));
+                end
+                
+                fprintf('Saving LFP Data for %s \n',recDname);
+                
+                save(recDname,lfpNs{:},'lfp','-append');
+                
+            catch
+                
+                lfp.sampFreqHz = CMacro_LFP_02_KHz*1000;
+                lfp.timeStart = CMacro_LFP_02_TimeBegin;
+                lfp.timeEnd = CMacro_LFP_02_TimeEnd;
+                
+                lfpNs = cell(numSpks,1);
+                for si = 1:numSpks
+                    uniNum = uniqueNUMS2(si);
+                    lfpNs{si} = strcat('CMacro_LFP_0',num2str(uniNum));
+                end
+                
+                fprintf('Saving LFP Data for %s \n',recDname);
+                
+                save(recDname,lfpNs{:},'lfp','-append');
+                
+            end
+            
+        end
+        
+    else
+        
+        mer = struct;
+        
+        mer.sampFreqHz = CElectrode1_KHz*1000;
+        mer.timeStart = CElectrode1_TimeBegin;
+        mer.timeEnd = CElectrode1_TimeEnd;
+        
+        ProcDone = 1;
+        
+        fprintf('Saving MER Data for %s \n',recDname);
+        
+        save(recDname,'CElectrode1','CElectrode2','CElectrode3',...
+            'mer','ProcDone');
+        
+        if ttlCheck2
+            
+            ttlName = strcat(getTTLitems{useIndUD(1)}{1},'_',getTTLitems{useIndUD(1)}{2},'_');
+            
+            ttlInfo.ttl_up = eval(strcat(ttlName,'Up'));
+            ttlInfo.ttl_dn = eval(strcat(ttlName,'Down'));
+            ttlInfo.ttl_sf = eval(strcat(ttlName,'KHz'));
+            ttlInfo.ttlTimeBegin = eval(strcat(ttlName,'TimeBegin'));
+            ttlInfo.ttlTimeEnd = eval(strcat(ttlName,'TimeEnd'));
+            ttlInfo.ttlTimesUp = TTL_sp_UP;
+            ttlInfo.ttlTimesDn = TTL_sp_DN;
+            
+            fprintf('Saving TTL Data for %s \n',recDname);
+            
+            save(recDname,'ttlInfo','-append');
+        end
+        
+        if LFPcheck
+            
+            lfp = struct;
+            
+            lfp.sampFreqHz = CLFP1_KHz*1000;
+            lfp.timeStart = CLFP1_TimeBegin;
+            lfp.timeEnd = CLFP1_TimeEnd;
+            
+            fprintf('Saving LFP Data for %s \n',recDname);
+            
+            save(recDname,'lfp','CLFP1','CLFP2','CLFP3','-append');
+        end
+        % End of test for ttl and LFP
+    end
+end % Determine already done
 
-              listCur = whos;
-              curFnames = {listCur.name};
-              
-              
-              
-              % MER
-              ProcDone = 1;
-              
-              mer = struct;
-              
-              mer.sampFreqHz = CSPK_01_KHz*1000;
-              mer.timeStart = CSPK_01_TimeBegin;
-              mer.timeEnd = CSPK_01_TimeEnd; 
-              
-              % Find number of Electrodes
-              findSpk = strfind(curFnames,'CSPK');
-              spkBlock = curFnames(cellfun(@(x) ~isempty(x), findSpk));
-              
-              spkNumB = cellfun(@(x) strsplit(x,'_'), spkBlock,'UniformOutput',false);
-              spkNumEx = cellfun(@(x) x{2}, spkNumB,'UniformOutput',false);
-              numSpks = numel(unique(spkNumEx));
-              
-              uniqueNUMS1 = cellfun(@(x) strsplit(x,'_'), spkBlock , 'UniformOutput', false);
-              uniqueNUMS2 = unique(cell2mat(cellfun(@(x) str2double(x{2}), uniqueNUMS1, 'UniformOutput', false)));
-              
-              spkNs = cell(numSpks,1);
-              for si = 1:numSpks
-                  uniNum = uniqueNUMS2(si);
-                  spkNs{si} = strcat('CSPK_0',num2str(uniNum));
-              end
-              
-              fprintf('Saving MER Data for %s \n',recDname);
-              save(recDname,spkNs{:},'mer','ProcDone');
-              
-              % microLFP
-              
-              mLFP = struct;
-              
-              mLFP.sampFreqHz = CLFP_01_KHz*1000;
-              mLFP.timeStart = CLFP_01_TimeBegin;
-              mLFP.timeEnd = CLFP_01_TimeEnd; 
-              
-              mlfpNs = cell(numSpks,1);
-              for si = 1:numSpks
-                  uniNum = uniqueNUMS2(si);
-                  mlfpNs{si} = strcat('CLFP_0',num2str(uniNum));
-              end
-              
-              fprintf('Saving mLFP Data for %s \n',recDname);
-              save(recDname,mlfpNs{:},'mLFP','-append');
-              
-              % Segmentation Check
-              findSeg = strfind(curFnames,'CSEG');
-              segBlock = cellfun(@(x) ~isempty(x),findSeg);
-              if sum(segBlock) ~= 0
-                  segNames = curFnames(segBlock);
-                  segNums = unique(cellfun(@(x) str2double(x(7)), segNames));
-                  
-                  % Looks for Level and Level Seg
-                  findLevlS = strfind(curFnames,'LEVEL_SEG');
-                  ls_block = cellfun(@(x) ~isempty(x), findLevlS);
-                  
-                  findLevl = strfind(curFnames(~ls_block),'LEVEL');
-                  l_block = cellfun(@(x) ~isempty(x), findLevl);
-                  
-                  segSaveS = cell(1,length(segNums)*2);
-                  si = 1;
-                  linCount = 1;
-                  while si <= length(segNums)
-                      if sum(l_block) ~= 0
-                          segSaveS{linCount} = strcat('CSEG_0',num2str(segNums(si)),'_LEVEL');
-                          linCount = linCount + 1;
-                      end
-                      if sum(ls_block) ~= 0
-                          segSaveS{linCount} = strcat('CSEG_0',num2str(segNums(si)),'_LEVEL_SEG');
-                          linCount = linCount + 1;
-                      end
-                      si = si + 1;
-                  end
-                  
-                  segSaveS = segSaveS(cellfun(@(x) ~isempty(x), segSaveS)); 
-                  
-                  spkSeg = struct;
-                  
-                  spkSeg.sampFreqHz = eval(strcat('CSEG_0',num2str(segNums(1)),'_KHz'));
-                  spkSeg.timeStart = eval(strcat('CSEG_0',num2str(segNums(1)),'_TimeBegin'));
-                  spkSeg.timeEnd = eval(strcat('CSEG_0',num2str(segNums(1)),'_TimeEnd'));
-
-                  fprintf('Saving SEG Data for %s \n',recDname);
-                  
-                  lookSeq = zeros(1,length(segSaveS));
-                  for lii = 1:length(segSaveS)
-                      
-                      if ~exist(segSaveS{lii},'var')
-                          lookSeq(lii) = 0;
-                      else
-                          lookSeq(lii) = 1;
-                      end
-
-                  end
-                  
-                  if all(lookSeq)
-                      save(recDname,segSaveS{:},'spkSeg','-append');
-                  end
-                  
-              end
-              
-              % TTL extract
-              if ttlCheck2
-                  
-                  ttlName = strcat(getTTLitems{useIndUD(1)}{1},'_',getTTLitems{useIndUD(1)}{2},'_',...
-                      getTTLitems{useIndUD(1)}{3},'_');
-                  
-                  ttlInfo.ttl_up = eval(strcat(ttlName,'Up'));
-                  ttlInfo.ttl_dn = eval(strcat(ttlName,'Down'));
-                  ttlInfo.ttl_sf = eval(strcat(ttlName,'KHz'));
-                  ttlInfo.ttlTimeBegin = eval(strcat(ttlName,'TimeBegin'));
-                  ttlInfo.ttlTimeEnd = eval(strcat(ttlName,'TimeEnd'));
-                  ttlInfo.ttlTimesUp = TTL_sp_UP;
-                  ttlInfo.ttlTimesDn = TTL_sp_DN;
-                  
-                  fprintf('Saving TTL Data for %s \n',recDname);
-                  
-                  save(recDname,'ttlInfo','-append');
- 
-              end
-
-              
-              % EMG Check % process
-              whoS = whos;
-              wspace = {whoS.name};
-              emgCheck1 = sum(contains(wspace,'CEMG'));
-              
-              if emgCheck1 ~= 0
-                  
-                  emg = struct;
-                  
-                  emg.sampFreqHz = CEMG_2___01_KHz*1000;
-                  emg.timeStart = CEMG_2___01_TimeBegin;
-                  emg.timeEnd = CEMG_2___01_TimeEnd;
-                  emg.bitRes = CEMG_2___01_BitResolution; 
-                  
-                  % Find number of Electrodes
-                  
-                  curWho = whos;
-                  newCurWS = {curWho.name};
-                  findEMG = newCurWS(contains(newCurWS,'CEMG'));
-                  
-                  t = cellfun(@(x) replace(x,'_',' '), findEMG,'UniformOutput',false);
-                  t1 = cellfun(@(x) strsplit(x,' '), t,'UniformOutput',false);
-                  
-                  emgNums = unique(cellfun(@(x) str2double(x{3}), t1,'UniformOutput',true));
-
-                  numEMGS = length(emgNums);
-                  
-                  emgNs = cell(numEMGS,1);
-                  for si = 1:numEMGS
-                      
-                      if length(num2str(si)) == 1
-                      
-                         emgNs{si} = strcat('CEMG_2___0',num2str(si));
-                      
-                      else
-                          emgNs{si} = strcat('CEMG_2___',num2str(si));
-                      end
-                  end
-                  
-                  fprintf('Saving EMG Data for %s \n',recDname);
-                  save(recDname,emgNs{:},'emg','-append');
-                  
-              end
-              
-              % EMG Check % process
-              whoS = whos;
-              wspace = {whoS.name};
-              accelCheck1 = sum(contains(wspace,'CACC'));
-              
-              if accelCheck1 ~= 0
-                  
-                  accel = struct;
-                  
-                  accel.sampFreqHz = CACC_3___01___Sensor_1___X_KHz*1000;
-                  accel.timeStart = CACC_3___01___Sensor_1___X_TimeBegin;
-                  accel.timeEnd = CACC_3___01___Sensor_1___X_TimeEnd;
-                  accel.bitRes = CACC_3___01___Sensor_1___X_BitResolution; 
-                  accel.gain = CACC_3___01___Sensor_1___X_Gain;
-                  
-                  % Find number of Electrodes
-                  
-                  curWho = whos;
-                  newCurWS = {curWho.name};
-                  findAccel = newCurWS(contains(newCurWS,'CACC'));
-                  
-                  % COUNT Unique SENSORS
-                  
-                  separateNs = cellfun(@(x) strsplit(x,{'_'}), findAccel,'UniformOutput',false);
-                  sensorNums = cellfun(@(x) str2double(x{5}), separateNs);
-                  uniSensNums = unique(sensorNums);
-                  
-%                   accelNums = unique(cellfun(@(x) str2double(x(11)), findAccel,'UniformOutput',true));
-                  
-                  numAccels = length(uniSensNums);
-                  
-                  % Need X , Y , Z for each ACCEL
-                  accDirs = 'XYZ';
-                  for si = 1:numAccels
-                      for xyzi = 1:3
-                          
-                          if si == 2
-                              sensN = xyzi + 3;
-                          else
-                              sensN = xyzi;
-                          end
-
-                          accel.(['accS' , num2str(si)]){xyzi} = eval(strcat('CACC_3___0',num2str(sensN),...
-                              '___Sensor_',num2str(si),'___',accDirs(xyzi)));
-                      end
-                  end
-                  
-                  fprintf('Saving ACCEL Data for %s \n',recDname);
-                  save(recDname,'accel','-append');
-                  
-              end
-              
-              
-              % EEG check % DETERMINE WAY TO GET names in PROGRAMMATICALLY
-              if eegCheck
-                  
-                  eeg = struct;
-                  
-                  if ~exist('CEEG_1___06','var')
-                      eegTempName = strcat('CEEG_1___06___',eegLabels.EEG_ID{6});
-                  else
-                      eegTempName = 'CEEG_1___06';
-                  end
-                  
-                  eeg.sampFreqHz = eval(strcat(eegTempName,'_KHz'))*1000;
-                  eeg.timeStart = eval(strcat(eegTempName,'_TimeBegin'));
-                  eeg.timeEnd = eval(strcat(eegTempName,'_TimeEnd'));
-                  eeg.bitRes = eval(strcat(eegTempName,'_BitResolution'));
-                  eeg.labels = eegLabels;
-                  
-                  numEEGs = size(eegLabels,1);
-                  
-                  eegSaveS = cell(numEEGs,1);
-                  
-                  if ~exist('CEEG_1___06','var')
-                      
-                      for eei = 1:numEEGs
-                          eegSaveS{eei} = strcat('CEEG_1___0',num2str(eei),'___',eegLabels.EEG_ID{eei});
-                      end
-                      
-                  else
-                      
-                      for eei = 1:numEEGs
-                          eegSaveS{eei} = strcat('CEEG_1___0',num2str(eei));
-                      end
-                      
-                  end
-                  
-                  fprintf('Saving EEG Data for %s \n',recDname);
-                  
-                  save(recDname, eegSaveS{:},'eeg','-append');
-                  
-              end
-              
-
-              % LFP
-              if LFPcheck
-                  
-                  lfp = struct;
-                  try
-                      lfp.sampFreqHz = CMacro_LFP_01_KHz*1000;
-                      lfp.timeStart = CMacro_LFP_01_TimeBegin;
-                      lfp.timeEnd = CMacro_LFP_01_TimeEnd;
-                      
-                      lfpNs = cell(numSpks,1);
-                      for si = 1:numSpks
-                          uniNum = uniqueNUMS2(si);
-                          lfpNs{si} = strcat('CMacro_LFP_0',num2str(uniNum));
-                      end
-                      
-                      fprintf('Saving LFP Data for %s \n',recDname);
-                      
-                      save(recDname,lfpNs{:},'lfp','-append');
-                      
-                  catch
-                      
-                      fprintf('NO LFP Data for %s \n',recDname);
-                      
-                  end
-                  
-              end
-
-          else
-              
-              mer = struct;
-              
-              mer.sampFreqHz = CElectrode1_KHz*1000;
-              mer.timeStart = CElectrode1_TimeBegin;
-              mer.timeEnd = CElectrode1_TimeEnd;
-              
-              ProcDone = 1;
-              
-              fprintf('Saving MER Data for %s \n',recDname);
-              
-              save(recDname,'CElectrode1','CElectrode2','CElectrode3',...
-                  'mer','ProcDone');
-              
-              if ttlCheck2
-                  
-                  ttlName = strcat(getTTLitems{useIndUD(1)}{1},'_',getTTLitems{useIndUD(1)}{2},'_');
-                  
-                  ttlInfo.ttl_up = eval(strcat(ttlName,'Up'));
-                  ttlInfo.ttl_dn = eval(strcat(ttlName,'Down'));
-                  ttlInfo.ttl_sf = eval(strcat(ttlName,'KHz'));
-                  ttlInfo.ttlTimeBegin = eval(strcat(ttlName,'TimeBegin'));
-                  ttlInfo.ttlTimeEnd = eval(strcat(ttlName,'TimeEnd'));
-                  ttlInfo.ttlTimesUp = TTL_sp_UP;
-                  ttlInfo.ttlTimesDn = TTL_sp_DN;
-                  
-                  fprintf('Saving TTL Data for %s \n',recDname);
-                  
-                  save(recDname,'ttlInfo','-append');
-              end
-              
-              if LFPcheck
-                  
-                  lfp = struct;
-                  
-                  lfp.sampFreqHz = CLFP1_KHz*1000;
-                  lfp.timeStart = CLFP1_TimeBegin;
-                  lfp.timeEnd = CLFP1_TimeEnd;
-                  
-                  fprintf('Saving LFP Data for %s \n',recDname);
-                  
-                  save(recDname,'lfp','CLFP1','CLFP2','CLFP3','-append');
-              end
-              % End of test for ttl and LFP
-          end
-      end % Determine already done
-      
 end
 
 
@@ -1252,7 +1281,7 @@ function [newLoc, lfpBool, toSaveFiles] = RenameCheckLFP(dateLoc, dai, diractual
 % Inputs:
 % 1. dateLoc = STRING of folder directory location
 % 2. dai = BOOLEAN indicating which SET to use
-% 3. diractual = STRING in case of SETs used to store folder directory 
+% 3. diractual = STRING in case of SETs used to store folder directory
 
 % Outputs:
 % 1. newLoc = STRING of directory for renamed files to be transferred.
@@ -1329,15 +1358,20 @@ else
             load(tempDepthFile)
         catch
             if neuroOmFlag
-                load(tempDepthFile,'CSPK_01','CSPK_01_KHz')
+                load(tempDepthFile,'CSPK_01','CSPK_01_KHz','CSPK_02','CSPK_02_KHz')
             else
                 load(tempDepthFile,'CElectrode1_KHz','CElectrode1')
             end
         end
         
         if neuroOmFlag
-            tempSfreq = CSPK_01_KHz * 1000;
-            tempRecTime = numel(CSPK_01)/tempSfreq;
+            try
+                tempSfreq = CSPK_01_KHz * 1000;
+                tempRecTime = numel(CSPK_01)/tempSfreq;
+            catch
+                tempSfreq = CSPK_02_KHz * 1000;
+                tempRecTime = numel(CSPK_02)/tempSfreq;
+            end
         else
             tempSfreq = CElectrode1_KHz * 1000;
             tempRecTime = numel(CElectrode1)/tempSfreq;
@@ -1402,7 +1436,7 @@ block = build_block_AO(ttlDN,...
 
 [toAddTTL_UP, toAddTTL_DN] = Get_ttl_Times_AO(block);
 
-TTL_sp_UP = toAddTTL_UP; 
+TTL_sp_UP = toAddTTL_UP;
 TTL_sp_DN = toAddTTL_DN;
 
 save(ttlInput,'TTL_sp_UP','-append')
@@ -1411,7 +1445,7 @@ save(ttlInput,'TTL_sp_DN','-append')
 fprintf('Add_TTL_Vec file %s SAVED!!! \n',ttlInput);
 
 % clearvars(lVarNames{:})
-            
+
 
 end
 
@@ -1468,14 +1502,14 @@ if eegFlag
     % Save Anatomy
     if eegNumC > 4
         
-%         eegNameEx = cellfun(@(x) x{4}, eegNumB,'UniformOutput',false);
+        %         eegNameEx = cellfun(@(x) x{4}, eegNumB,'UniformOutput',false);
         eegTab = cell(numEEGs,1);
         
         % GET INDICIES FROM BELOW
         eegNEx = cellfun(@(x) str2double(x), eegNumEx);
         uniEEGnums = unique(eegNEx);
         for uni = 1:max(uniEEGnums)%fi = 1:length(eegNumB)
-           
+            
             numInd = find(eegNEx == uniEEGnums(uni), 1, 'first');
             
             tempCell = eegNumB{numInd};
@@ -1484,14 +1518,14 @@ if eegFlag
                 if numel(tempCell) == 5
                     eegTab{uni,1} = strcat(tempCell{4},'_',tempCell{5});
                 elseif numel(tempCell) == 6
-                    eegTab{uni,1} = strcat(tempCell{4},'_',tempCell{5},'_',tempCell{6}); 
+                    eegTab{uni,1} = strcat(tempCell{4},'_',tempCell{5},'_',tempCell{6});
                 end
             else
                 eegTab{uni,1} = tempCell{4};
             end
             
         end
-
+        
         eegIDs = cell2table([eegNs , eegTab],'VariableNames',{'EEG_Num','EEG_ID'});
         
     else
