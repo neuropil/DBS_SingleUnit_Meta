@@ -219,6 +219,8 @@ if doneTag == 0
                         ttlChecklist{ttlCc} = depthFiles{ttlfi};
                         ttlCc = ttlCc + 1;
                     else
+                        ttlChecklist{ttlCc} = depthFiles{ttlfi}; % CHANGED 1/18/2020 &#$%&#&#$&#$&#$&#$
+                        ttlCc = ttlCc + 1;
                         continue
                     end
                 else
@@ -858,7 +860,8 @@ useIndUD = find(getUpODown);
 
 % Check for mis-fired TTL just one TTL : added 8/30/2016
 if ttlCheck0
-    ttlCheck1 = ttlErrorCheck(recDname,getTTLitems);
+%     ttlCheck1 = ttlErrorCheck(recDname,getTTLitems); Modified 1/21/2020
+    ttlCheck1 = 1;
 else
     ttlCheck1 = 0;
 end
@@ -1425,8 +1428,8 @@ end
 
 ttlUP = eval(strcat(ttlName,'Up'));
 ttlDN = eval(strcat(ttlName,'Down'));
-ttlTB = eval(strcat(ttlName,'KHz'));
-ttlHz = eval(strcat(ttlName,'TimeBegin'));
+ttlTB = eval(strcat(ttlName,'TimeBegin'));
+ttlHz = eval(strcat(ttlName,'KHz'));
 
 block = build_block_AO(ttlDN,...
     ttlUP,...
@@ -1702,7 +1705,7 @@ if neuroOmFlag
     end % End of IF/ELSE to decide name format
 end % End of IF/ELSE neuroomega
 
-keyboard
+
 
 end % End of function
 

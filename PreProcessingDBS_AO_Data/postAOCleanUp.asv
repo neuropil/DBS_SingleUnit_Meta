@@ -13,8 +13,8 @@ switch study
         % Keep TTL
         
         % # 2 DELETE FILES from S3
-%         cd(cur_Dir)
-%         ckSet = checkSets(cur_Dir);
+        cd(cur_Dir)
+        ckSet = checkSets(cur_Dir);
         
         % Loop through cases
         % Use Matfile to find relevant files
@@ -37,11 +37,21 @@ switch study
             for setI = 1:length(setMatDir)
                 tmpSET = [cur_Dir , dsh , setMatDir{setI}];
                 toTList = getMatNames(tmpSET , 1);
-                runFrefine(toTList , study)
+                for ti = 1:length(toTList)
+                    tmpMat = toTList{ti};
+                    tmpMfN = getMatfile(tmpMat);
+                    [remFinal , ~] = remvIndex(tmpMfN , study);
+                    % Load
+                    allDat = load(tmpMat);
+                    % Resave with new list
+                    newDat = rmfield(allDat,remFinal);
+                    save(tmpMat,'-struct',newDat)
+                    % Clear all
+                    clearvars allDat
+                end
             end
         else
             toTList = getMatNames(curDIR);
-            runFrefine(toTList , study)
             
         end
         
@@ -103,12 +113,14 @@ end
 
 
 
+
+
 %%%% REMOVE list 
 function [remFinal , keepFinal] = remvIndex(fldList , expType)
 
 switch expType
     case 'ET-DK' % MAY NEED To MODIFY for ACCEL
-        keepList = {'CEMG','CSPK','CLFP','CMacro','ProcDone','accel','emg','lfp','mLFP','mer','ttlInfo'};
+        keepList = {'CEMG','CSPK','CLFP','CMacro','ProcDone','accel','emg','lfp','mLFP','mer'};
         keepIndex = contains(fldList,keepList);
         listK1 = fldList(keepIndex);
         listR1 = fldList(~keepIndex);
@@ -121,34 +133,13 @@ switch expType
         keepFinal = [emgKeep , nonEmgList];
         remFinal = [emgRem ,listR1];
         % FUTURE Remove unnecessary ACCEL
-    case 'BLAH'
-        
-        
+
+
 end
-end
-
-
-%%%% LOOP through and CLEAN files
-function [] = runFrefine(toTList , study)
-
-numFiles = length(toTList);
-for ti = 1:length(toTList)
-    tmpMat = toTList{ti};
-    tmpMfN = getMatfile(tmpMat);
-    [remFinal , ~] = remvIndex(tmpMfN , study);
-    % Load
-    allDat = load(tmpMat);
-    % Resave with new list
-    newDat = rmfield(allDat,remFinal);
-    save(tmpMat,'-struct','newDat')
-    % Clear all
-    clearvars allDat
-    disp([num2str(ti) , ' out of ' , num2str(numFiles), ' done!'])
 end
 
 
 
-end
 
 
 

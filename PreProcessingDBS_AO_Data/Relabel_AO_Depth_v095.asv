@@ -219,6 +219,8 @@ if doneTag == 0
                         ttlChecklist{ttlCc} = depthFiles{ttlfi};
                         ttlCc = ttlCc + 1;
                     else
+                        ttlChecklist{ttlCc} = depthFiles{ttlfi};
+                        ttlCc = ttlCc + 1;
                         continue
                     end
                 else
@@ -1702,7 +1704,7 @@ if neuroOmFlag
     end % End of IF/ELSE to decide name format
 end % End of IF/ELSE neuroomega
 
-keyboard
+
 
 end % End of function
 
