@@ -40,7 +40,7 @@ switch study
                 runFrefine(toTList , study)
             end
         else
-            toTList = getMatNames(curDIR);
+            toTList = getMatNames(cur_Dir , 1);
             runFrefine(toTList , study)
             
         end
