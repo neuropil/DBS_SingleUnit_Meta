@@ -1,4 +1,4 @@
-function [] = initializeS2_S3(year)
+function [] = initializeS2_S3(year , driveLetter)
 % COPY raw s2 files over to s3
 % COPY NOAO and lfp file over to s3
 % CHECKS
@@ -8,8 +8,8 @@ function [] = initializeS2_S3(year)
 
 dsh = filesep;
 
-S2_dir = ['W:\S2_AOUnFMatlabData_S2',dsh,num2str(year)];
-S3_dir = ['W:\S3_AO_MatlabData_S3',dsh,num2str(year)];
+S2_dir = [driveLetter,'\S2_AOUnFMatlabData_S2',dsh,num2str(year)];
+S3_dir = [driveLetter,'\S3_AO_MatlabData_S3',dsh,num2str(year)];
 
 % Get S2 DIR list
 s2FoldNs = getDirFolders(S2_dir);

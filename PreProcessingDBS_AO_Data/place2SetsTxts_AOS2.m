@@ -1,10 +1,16 @@
-function [] = place2SetsTxts_AOS2(year)
+function [] = place2SetsTxts_AOS2(year , driveLetter)
 %place2SetsTxts_AOS2
 % Configure set folders and ADD text files NOAO and lfp_yes
 
-removeTxtAOS2(year)
+removeTxtAOS2(year , driveLetter)
 
-mainDir = ['W:\S2_AOUnFMatlabData_S2',filesep,num2str(year)];
+name = getenv('COMPUTERNAME');
+
+if strcmp(name,'DESKTOP-95LU6PO')
+    mainDir = ['D:\RAWDBSmer\S2_AOUnFMatlabData_S2',filesep,num2str(year)];
+else
+    mainDir = ['W:\S2_AOUnFMatlabData_S2',filesep,num2str(year)];
+end
 
 dateDirFs = getDirFolders(mainDir);
 
