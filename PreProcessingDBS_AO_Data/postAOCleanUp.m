@@ -1,10 +1,10 @@
-function [] = postAOCleanUp(study,year,surgDATE)
+function [] = postAOCleanUp(study,year,surgDATE,driveLETTER)
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
 
 dsh = filesep;
 
-cur_Dir = ['W:\S4_AO_ProcMatlabData_S4',dsh,num2str(year),dsh,surgDATE];
+cur_Dir = [driveLETTER,'\S4_AO_ProcMatlabData_S4',dsh,num2str(year),dsh,surgDATE];
 
 switch study
     case 'AT-IO'

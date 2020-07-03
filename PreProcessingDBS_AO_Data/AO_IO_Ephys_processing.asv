@@ -1,7 +1,7 @@
-function [] = AO_IO_Ephys_processing(step , year , driveLetter, study , date)
+function [] = AO_IO_Ephys_processing(step , year , driveLetter, date)
 
 
-if nargin == 4
+if nargin == 3
     
     date2use = nan;
     
@@ -18,9 +18,9 @@ switch step
         place2SetsTxts_AOS2(year , driveLetter)
     case 2
         initializeS2_S3(year , driveLetter)
-    case 3 % NEED TO FIX SETS
-        postAOCleanUp(study , year , date2use , driveLetter)
-    case 4 % NEED TO FIX SETS
+    case 3
+        postAOCleanUp(study ,year,surgDATE,driveLETTER)
+    case 3
         resetS3_S4_crash(year , date2use , driveLetter)
 end
 

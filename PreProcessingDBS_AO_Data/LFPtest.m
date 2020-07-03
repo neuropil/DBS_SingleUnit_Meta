@@ -2,8 +2,10 @@ function lfpBool = LFPtest(locName , driveLetter)
 
 locparts = strsplit(locName,'\');
 
-if length(locparts) == 5
-    loc2use = strcat(driveLetter,'\S3_AO_MatlabData_S3\',locparts{4},'\',locparts{5});
+if length(locparts) == 4
+    loc2use = strcat(driveLetter,'\S3_AO_MatlabData_S3\',locparts{3},'\',locparts{4});
+elseif length(locparts) == 5
+    loc2use = strcat(driveLetter,'\S3_AO_MatlabData_S3\',locparts{3},'\',locparts{4},'\',locparts{5});
 else
     loc2use = strcat(driveLetter,'\S3_AO_MatlabData_S3\',locparts{4},'\',locparts{5},'\',locparts{6});
 end

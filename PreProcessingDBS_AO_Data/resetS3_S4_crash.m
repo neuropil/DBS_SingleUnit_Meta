@@ -1,4 +1,4 @@
-function [] = resetS3_S4_crash(year , surgDATE)
+function [] = resetS3_S4_crash(year , surgDATE , driveLetter)
 %THIS function will reset a failed transfer to S4
 % 1. Deletes WHOLE FOLDER from date from year in S4
 % 2. Deletes ONLY FILES from date from year in S3
@@ -7,9 +7,9 @@ function [] = resetS3_S4_crash(year , surgDATE)
 
 dsh = filesep;
 
-S2_dir = ['W:\S2_AOUnFMatlabData_S2',dsh,num2str(year),dsh,surgDATE];
-S3_dir = ['W:\S3_AO_MatlabData_S3',dsh,num2str(year),dsh,surgDATE];
-S4_dir = ['W:\S4_AO_ProcMatlabData_S4',dsh,num2str(year),dsh,surgDATE];
+S2_dir = [driveLetter,'\S2_AOUnFMatlabData_S2',dsh,num2str(year),dsh,surgDATE];
+S3_dir = [driveLetter,'\S3_AO_MatlabData_S3',dsh,num2str(year),dsh,surgDATE];
+S4_dir = [driveLetter,'\S4_AO_ProcMatlabData_S4',dsh,num2str(year),dsh,surgDATE];
 
 % # 1 DELETE WHOLE FOLDER from S4
 if exist(S4_dir,'dir')

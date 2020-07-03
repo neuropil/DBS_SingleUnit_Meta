@@ -1659,6 +1659,11 @@ if neuroOmFlag
                     tempNumNa = oldName(6:10);
                     numNaParts = strsplit(tempNumNa,'.');
                     newName = strcat('-0',[numNaParts{:}],'000',oldName(length(oldName)),'.mat');
+                    
+                    % ADDED 07/03/2020
+                    tempOD = strsplit(lower(oldName),{'d','f'});
+                    zeroCheck1 = strcmp(tempOD{3}(end - 1),'0');
+                    zeroCheck2 = strcmp(tempOD{3}(3),'0');
                 else
                     tempOD = strsplit(lower(oldName),{'d','f'});
                     zeroCheck1 = strcmp(tempOD{3}(end - 1),'0');
