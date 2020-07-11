@@ -7,9 +7,9 @@ removeTxtAOS2(year , driveLetter)
 name = getenv('COMPUTERNAME');
 
 if strcmp(name,'DESKTOP-95LU6PO')
-    mainDir = ['D:\RAWDBSmer\S2_AOUnFMatlabData_S2',filesep,num2str(year)];
+    mainDir = [driveLetter,'\RAWDBSmer\S2_AOUnFMatlabData_S2',filesep,num2str(year)];
 else
-    mainDir = ['W:\S2_AOUnFMatlabData_S2',filesep,num2str(year)];
+    mainDir = [driveLetter,'\S2_AOUnFMatlabData_S2',filesep,num2str(year)];
 end
 
 dateDirFs = getDirFolders(mainDir);
