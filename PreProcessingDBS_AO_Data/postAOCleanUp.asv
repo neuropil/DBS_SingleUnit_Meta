@@ -148,7 +148,7 @@ switch expType
         % Remove unnecessary EMG
         emgLIST = listK1(contains(listK1,'CEMG'));
         nonEmgList = listK1(~contains(listK1,'CEMG'));
-        emgKeepI = cellfun(@(x) str2double(x(end-1:end)) <= 4, emgLIST);
+        emgKeepI = cellfun(@(x) str2double(x(end-1:end)) <= 7, emgLIST);
         emgKeep = emgLIST(emgKeepI);
         emgRem = emgLIST(~emgKeepI);
         keepFinal = [emgKeep , nonEmgList];
