@@ -757,6 +757,11 @@ if doneTag == 0
     curLocDir = pwd;
     newFnames = GetDirFileList(curLocDir);
     
+    if ischar(newFnames)
+        newFnames = {newFnames};
+    end
+    
+    
     for allLi = 1:length(newFnames)
         
         alltempFname = newFnames{allLi};
@@ -1305,6 +1310,7 @@ testFileA = depthFiles{1};
 
 if driveLOC
     actFileDir = strrep(tempdateLoc, [driveLetter,'\S3_AO_MatlabData_S3\'], '');
+    lfpDir = [driveLetter,'\S3_AO_MatlabData_S3\',actFileDir];
     preProLoc = [driveLetter,'\S4_AO_ProcMatlabData_S4\' , actFileDir];
 else
     actFileDir = strrep(tempdateLoc, 'W:\AO_MatlabData_S3\', '');
@@ -1342,13 +1348,19 @@ allFilesLn = {allFilesL.name};
 
 if ~isempty(allFilesLn) && ismember('RMd_files.txt',allFilesLn)
     toSaveFiles = GetDirFileList(newLoc);
-    lfpBool = LFPtest(newLoc , driveLetter);
+    lfpBool = LFPtest(lfpDir);
     return
 else
     
     toProcNames = GetDirFileList(newLoc);
-    lfpBool = LFPtest(newLoc , driveLetter);
-    toSaveFiles = cell(length(toProcNames),1);
+    lfpBool = LFPtest(lfpDir);
+    
+    if ischar(toProcNames)
+        toSaveFiles = cell(1,1);
+        toProcNames = {toProcNames};
+    else
+        toSaveFiles = cell(length(toProcNames),1);
+    end
     sfcount = 1;
     
     cd(newLoc)
